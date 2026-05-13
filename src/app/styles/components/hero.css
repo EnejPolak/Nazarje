@@ -1,0 +1,58 @@
+.public-hero {
+  padding-top: 4rem;
+  background: #F7F4EE;
+}
+
+.public-hero__frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+}
+
+.public-hero__frame::before,
+.public-hero__frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.public-hero__frame::before {
+  background: url('../../assets/nazarje-slika.jpg') center / cover no-repeat;
+}
+
+.public-hero__content {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 4rem) 1.5rem;
+  box-sizing: border-box;
+}
+
+.public-hero__title {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+  width: auto;
+  color: #fff;
+  font-size: clamp(3rem, 10vw, 9rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 0.95;
+  text-align: left;
+  text-shadow: none;
+}
+
+.public-hero__title span {
+  display: block;
+}
+
+.public-hero__title-line--offset {
+  margin-top: 15rem;
+  text-align: right;
+}
+

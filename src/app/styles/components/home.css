@@ -1,0 +1,6 @@
+.home-calendar-section {
+  position: relative;
+  z-index: 2;
+  margin-top: clamp(-5rem, -7vw, -2.5rem);
+  padding-bottom: 4rem;
+}
