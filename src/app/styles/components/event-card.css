@@ -1,0 +1,31 @@
+.event-card-ticket {
+  position: relative;
+  overflow: visible;
+  --event-card-cutout-bg: #F7F4EE;
+}
+
+#dogodki .event-card-ticket {
+  --event-card-cutout-bg: #EAF1EA;
+}
+
+.event-card-ticket::before,
+.event-card-ticket::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  width: clamp(1.5rem, 4vw, 2rem);
+  height: clamp(1.5rem, 4vw, 2rem);
+  background: var(--event-card-cutout-bg);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.event-card-ticket::before {
+  left: calc(clamp(1.5rem, 4vw, 2rem) / -2);
+}
+
+.event-card-ticket::after {
+  right: calc(clamp(1.5rem, 4vw, 2rem) / -2);
+}

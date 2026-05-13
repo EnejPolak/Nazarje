@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
 import { categoryBadgeBgClass } from '../../../data/events';
 import { formatCompactSlovenianDateRange } from '../../../utils/event-date';
+import '../../../styles/components/event-card.css';
 
 export interface Event {
   id: string;
@@ -33,11 +34,11 @@ export function EventCard({ event, onClick, grayscale, index = 0 }: EventCardPro
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.45, delay: (index % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="bg-white rounded-lg shadow-sm border border-[#1E3A2F]/10 overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
+      className="event-card-ticket bg-white rounded-lg shadow-sm border border-[#1E3A2F]/10 hover:shadow-md transition-shadow cursor-pointer group"
       onClick={onClick}
     >
       {event.imageUrl && (
-        <div className="w-full h-48 overflow-hidden">
+        <div className="w-full h-48 overflow-hidden rounded-t-lg">
           <motion.div
             whileHover={{ scale: 1.04 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -51,29 +52,17 @@ export function EventCard({ event, onClick, grayscale, index = 0 }: EventCardPro
           </motion.div>
         </div>
       )}
-      <div className="p-6">
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <h3 className="text-xl text-[#18201B] flex-1 min-w-0 pr-2">
+      <div className="relative p-6 pt-10">
+        <span
+          className={`absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 px-4 py-1.5 rounded-full text-xs text-white whitespace-nowrap shadow-sm ${categoryBadgeBgClass(event.category)}`}
+        >
+          {event.category}
+        </span>
+
+        <div className="mb-4">
+          <h3 className="text-xl text-[#18201B]">
             {event.title}
           </h3>
-          <div className="flex flex-wrap justify-end gap-1.5 shrink-0 max-w-[50%]">
-            <span
-              className={`px-3 py-1 rounded-full text-xs text-white whitespace-nowrap ${categoryBadgeBgClass(event.category)}`}
-            >
-              {event.category}
-            </span>
-            {event.isImportant && (
-              <span
-                className={`px-3 py-1 rounded-full text-xs text-white whitespace-nowrap ${
-                  event.secondaryFilter
-                    ? categoryBadgeBgClass(event.secondaryFilter)
-                    : 'bg-[#9B3A32]'
-                }`}
-              >
-                {event.secondaryFilter || 'Nujno'}
-              </span>
-            )}
-          </div>
         </div>
 
         <div className="space-y-2 mb-4">

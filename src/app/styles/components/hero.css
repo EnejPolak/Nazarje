@@ -1,11 +1,10 @@
 .public-hero {
-  padding-top: 4rem;
   background: #F7F4EE;
 }
 
 .public-hero__frame {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 15 / 9;
   width: 100%;
   overflow: hidden;
 }
@@ -28,7 +27,7 @@
   inset: 0;
   max-width: 80rem;
   margin: 0 auto;
-  padding: clamp(1.5rem, 4vw, 4rem) 1.5rem;
+  padding: calc(4rem + clamp(1.5rem, 4vw, 4rem)) 1.5rem clamp(1.5rem, 4vw, 4rem);
   box-sizing: border-box;
 }
 
