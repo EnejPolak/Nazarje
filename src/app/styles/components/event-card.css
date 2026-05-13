@@ -1,3 +1,17 @@
+.event-card {
+  position: relative;
+  max-width: 22rem;
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid rgb(30 58 47 / 0.08);
+  border-radius: 1.375rem;
+  box-shadow: none;
+  cursor: pointer;
+  transition:
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+
 .event-card-ticket {
   position: relative;
   overflow: visible;
@@ -12,7 +26,7 @@
 .event-card-ticket::after {
   content: '';
   position: absolute;
-  top: 50%;
+  top: 65%;
   z-index: 3;
   width: clamp(1.5rem, 4vw, 2rem);
   height: clamp(1.5rem, 4vw, 2rem);
@@ -28,4 +42,198 @@
 
 .event-card-ticket::after {
   right: calc(clamp(1.5rem, 4vw, 2rem) / -2);
+}
+
+.event-card__image-wrap {
+  position: relative;
+  height: clamp(9.5rem, 14vw, 12rem);
+  overflow: hidden;
+  border-radius: 1.375rem 1.375rem 0 0;
+  background: #111;
+}
+
+.event-card__image-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(0 0 0 / 0.04) 0%,
+    rgb(0 0 0 / 0.08) 55%,
+    rgb(0 0 0 / 0.24) 100%
+  );
+  pointer-events: none;
+}
+
+.event-card__image-motion,
+.event-card__image {
+  width: 100%;
+  height: 100%;
+}
+
+.event-card__image {
+  display: block;
+  object-fit: cover;
+  transition:
+    filter 500ms ease,
+    transform 450ms ease;
+}
+
+.event-card:hover .event-card__image {
+  transform: scale(1.04);
+}
+
+.event-card__body {
+  position: relative;
+  padding: 2rem 1.2rem 1.2rem;
+}
+
+.event-card__badge {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 4;
+  padding: 0.36rem 1rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.66rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: 0 0.45rem 1rem rgb(18 48 55 / 0.16);
+  transform: translate(-50%, -50%);
+}
+
+.event-card__title {
+  margin: 0 0 0.85rem;
+  color: #17211d;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+}
+
+.event-card__meta {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 0.85rem;
+}
+
+.event-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #5b635f;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.event-card__meta-item svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+  color: #3D6F7A;
+}
+
+.event-card__description {
+  margin: 0 0 0.95rem;
+  color: #424b46;
+  font-size: clamp(0.78rem, 1.05vw, 0.86rem);
+  font-weight: 450;
+  line-height: 1.45;
+}
+
+.event-card__attachments {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+  color: #3D6F7A;
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.event-card__attachments svg {
+  width: 0.82rem;
+  height: 0.82rem;
+  flex-shrink: 0;
+}
+
+.event-card__button {
+  display: flex;
+  width: 100%;
+  min-height: 2.55rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: #2F5D46;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  transition:
+    background 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+
+.event-card__button:hover {
+  background: #25583f;
+  box-shadow: 0 0.55rem 1.2rem rgb(47 104 75 / 0.18);
+  transform: translateY(-2px);
+}
+
+.event-card__button-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  transition: transform 200ms ease;
+}
+
+.event-card__button:hover .event-card__button-icon {
+  transform: translateX(0.125rem);
+}
+
+@media (max-width: 640px) {
+  .event-card {
+    max-width: none;
+    border-radius: 1.125rem;
+  }
+
+  .event-card__image-wrap {
+    height: 12rem;
+    border-radius: 1.125rem 1.125rem 0 0;
+  }
+
+  .event-card__body {
+    padding: 2.15rem 1.15rem 1.25rem;
+  }
+
+  .event-card__badge {
+    padding: 0.34rem 0.9rem;
+    font-size: 0.64rem;
+  }
+
+  .event-card__title {
+    font-size: 1.25rem;
+  }
+
+  .event-card__meta-item {
+    font-size: 0.8rem;
+  }
+
+  .event-card__description {
+    font-size: 0.84rem;
+    font-weight: 450;
+    line-height: 1.45;
+  }
+
+  .event-card__button {
+    min-height: 2.65rem;
+    border-radius: 0.7rem;
+    font-size: 0.84rem;
+  }
 }

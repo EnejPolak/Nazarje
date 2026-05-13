@@ -26,6 +26,16 @@ interface EventCardProps {
   index?: number;
 }
 
+function truncateWords(text: string, maxWords: number) {
+  const words = text.trim().split(/\s+/);
+
+  if (words.length <= maxWords) {
+    return text;
+  }
+
+  return `${words.slice(0, maxWords).join(' ')}...`;
+}
+
 export function EventCard({ event, onClick, grayscale, index = 0 }: EventCardProps) {
   return (
     <motion.div
@@ -34,62 +44,58 @@ export function EventCard({ event, onClick, grayscale, index = 0 }: EventCardPro
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.45, delay: (index % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="event-card-ticket bg-white rounded-lg shadow-sm border border-[#1E3A2F]/10 hover:shadow-md transition-shadow cursor-pointer group"
+      className="event-card event-card-ticket group"
       onClick={onClick}
     >
       {event.imageUrl && (
-        <div className="w-full h-48 overflow-hidden rounded-t-lg">
-          <motion.div
-            whileHover={{ scale: 1.04 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="w-full h-full"
-          >
+        <div className="event-card__image-wrap">
+          <div className="event-card__image-motion">
             <ImageWithFallback
               src={event.imageUrl}
               alt={event.title}
-              className={`w-full h-full object-cover transition-all duration-500 ${grayscale ? 'grayscale group-hover:grayscale-0' : ''}`}
+              className={`event-card__image ${grayscale ? 'grayscale group-hover:grayscale-0' : ''}`}
             />
-          </motion.div>
+          </div>
         </div>
       )}
-      <div className="relative p-6 pt-10">
+      <div className="event-card__body">
         <span
-          className={`absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 px-4 py-1.5 rounded-full text-xs text-white whitespace-nowrap shadow-sm ${categoryBadgeBgClass(event.category)}`}
+          className={`event-card__badge ${categoryBadgeBgClass(event.category)}`}
         >
           {event.category}
         </span>
 
-        <div className="mb-4">
-          <h3 className="text-xl text-[#18201B]">
+        <div>
+          <h3 className="event-card__title">
             {event.title}
           </h3>
         </div>
 
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center gap-2 text-sm text-[#18201B]/70">
-            <Calendar className="w-4 h-4 text-[#3D6F7A]" />
+        <div className="event-card__meta">
+          <div className="event-card__meta-item">
+            <Calendar />
             <span>{formatCompactSlovenianDateRange(event.date, event.dateEnd)}</span>
           </div>
-          <div className="flex items-center gap-2 text-sm text-[#18201B]/70">
-            <Clock className="w-4 h-4 text-[#3D6F7A]" />
+          <div className="event-card__meta-item">
+            <Clock />
             <span>{event.time}</span>
           </div>
         </div>
 
-        <p className="text-[#18201B]/80 mb-6 leading-relaxed">
-          {event.description}
+        <p className="event-card__description">
+          {truncateWords(event.description, 5)}
         </p>
 
         {event.attachments && event.attachments.length > 0 && (
-          <div className="flex items-center gap-1.5 mb-4 text-xs text-[#3D6F7A]">
-            <Paperclip className="w-3.5 h-3.5" />
+          <div className="event-card__attachments">
+            <Paperclip />
             <span>{event.attachments.length} {event.attachments.length === 1 ? 'priponka' : 'priponki'}</span>
           </div>
         )}
 
-        <button className="w-full bg-[#2F5D46] group-hover:bg-[#1E3A2F] text-white py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+        <button className="event-card__button">
           Preberi več
-          <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          <ChevronRight className="event-card__button-icon" />
         </button>
       </div>
     </motion.div>
