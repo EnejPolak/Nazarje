@@ -1,19 +1,7 @@
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
-import {
-  AlignLeft,
-  Calendar as CalendarIcon,
-  Clock,
-  FileText,
-  Image as ImageIconLu,
-  MapPin,
-  Paperclip,
-  Save,
-  Tag,
-  Trash2,
-  Type,
-  X,
-} from 'lucide-react';
+import { FileText, Save, Trash2, X } from 'lucide-react';
+import '../styles/components/crm-event-form.css';
 import type { EventData } from '../data/events';
 import {
   adminCreateEvent,
@@ -47,43 +35,58 @@ function fromDateInput(s: string): Date | null {
   return new Date(y, m - 1, d);
 }
 
-interface SectionProps {
-  icon: ReactNode;
+interface FormGroupProps {
+  id: string;
   title: string;
   description?: string;
   children: ReactNode;
 }
 
-function Section({ icon, title, description, children }: SectionProps) {
+function FormGroup({ id, title, description, children }: FormGroupProps) {
   return (
-    <section className="rounded-2xl border border-[#18201B]/10 bg-white p-5 sm:p-6 shadow-sm">
-      <header className="flex items-start gap-3 mb-4">
-        <span className="inline-flex size-9 items-center justify-center rounded-xl bg-[#EAF1EA] text-[#2F5D46] shrink-0">
-          {icon}
-        </span>
-        <div>
-          <h2 className="text-base font-semibold text-[#18201B] tracking-tight">{title}</h2>
-          {description && (
-            <p className="text-[13px] text-[#18201B]/60 leading-snug mt-0.5">{description}</p>
-          )}
-        </div>
+    <section className="crm-event-form__group" aria-labelledby={id}>
+      <header className="crm-event-form__group-head">
+        <h2 id={id} className="crm-event-form__group-title">
+          {title}
+        </h2>
+        {description && <p className="crm-event-form__group-desc">{description}</p>}
       </header>
-      <div className="space-y-4">{children}</div>
+      <div className="crm-event-form__group-body">{children}</div>
     </section>
   );
 }
 
-function FieldLabel({ children, hint }: { children: ReactNode; hint?: string }) {
+function FormDivider() {
+  return <hr className="crm-event-form__divider" />;
+}
+
+function Field({
+  label,
+  hint,
+  htmlFor,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  htmlFor?: string;
+  children: ReactNode;
+}) {
   return (
-    <div className="flex items-baseline justify-between gap-2 mb-1.5">
-      <label className="block text-sm font-medium text-[#18201B]">{children}</label>
-      {hint && <span className="text-[11px] text-[#18201B]/45">{hint}</span>}
+    <div className="crm-event-form__field">
+      <div className="crm-event-form__label-row">
+        {htmlFor ? (
+          <label htmlFor={htmlFor} className="crm-event-form__label">
+            {label}
+          </label>
+        ) : (
+          <span className="crm-event-form__label">{label}</span>
+        )}
+        {hint && <span className="crm-event-form__hint">{hint}</span>}
+      </div>
+      {children}
     </div>
   );
 }
-
-const inputCls =
-  'w-full rounded-lg border border-[#18201B]/18 bg-[#FAFAF8] px-3 py-2.5 text-sm text-[#18201B] placeholder:text-[#18201B]/35 outline-none focus:border-[#2F5D46]/50 focus:ring-1 focus:ring-[#2F5D46]/25';
 
 type FormAttachment = {
   key: string;
@@ -407,321 +410,284 @@ export function CrmEventForm() {
     );
   }
 
+  const saveLabel = uploadingImage
+    ? 'Nalagam sliko…'
+    : uploadingDocuments
+      ? 'Nalagam PDF…'
+      : saving
+        ? 'Shranjujem…'
+        : isEdit
+          ? 'Shrani spremembe'
+          : 'Shrani dogodek';
+
   return (
-    <div className="crm-page">
+    <div className="crm-page crm-page--event-form">
       <header className="crm-page__header">
         {isEdit && (
           <Link to={backPath} state={backState ?? undefined} className="crm-back-link">
             ← Nazaj
           </Link>
         )}
-        <p className="crm-page__eyebrow">CRM</p>
         <h1 className="crm-page__title">{isEdit ? 'Uredi dogodek' : 'Ustvari dogodek'}</h1>
         <p className="crm-page__subtitle">
-          Levo izpolni obrazec, desno v živo vidiš, kako bo izgledala kartica na strani.
+          Izpolni obrazec od zgoraj navzdol. Predogled na desni se posodablja med tipkanjem.
         </p>
       </header>
 
-      <form
-        onSubmit={onSubmit}
-        className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-6 items-start"
-      >
-        <div className="space-y-5 min-w-0">
-          <Section
-            icon={<Type className="size-5" />}
-            title="Osnove"
-            description="Naslov, ki se pojavi na kartici in na strani dogodka."
-          >
-            <div>
-              <FieldLabel hint={`${title.length} znakov`}>Naslov</FieldLabel>
-              <input
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="npr. Poletni koncert ob Savinji"
-                className={inputCls}
-              />
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4 pt-2">
-              <div>
-                <FieldLabel hint="opcijsko">Slug (URL)</FieldLabel>
-                <input
-                  value={slug}
-                  onChange={(e) => setSlug(e.target.value)}
-                  placeholder="poletni-koncert-nazarje"
-                  className={inputCls}
-                />
-              </div>
-              <div className="flex items-end">
-                <label className="flex items-center gap-2 cursor-pointer pb-2.5">
+      <form onSubmit={onSubmit} className="crm-event-form__layout">
+        <div className="crm-event-form__main">
+          <div className="crm-event-form__panel">
+            <FormGroup id="crm-event-basics" title="Osnovno">
+              <div className="crm-event-form__title-row">
+                <Field label="Naslov dogodka" htmlFor="event-title">
+                  <input
+                    id="event-title"
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="npr. Poletni koncert ob Savinji"
+                    className="crm-event-form__input"
+                  />
+                </Field>
+                <label className="crm-event-form__publish">
                   <input
                     type="checkbox"
                     checked={published}
                     onChange={(e) => setPublished(e.target.checked)}
-                    className="size-4 rounded border-[#18201B]/20"
                   />
-                  <span className="text-sm text-[#18201B]">Objavljeno na javni strani</span>
+                  <span>Objavljeno</span>
                 </label>
               </div>
-            </div>
-          </Section>
+            </FormGroup>
 
-          <Section
-            icon={<CalendarIcon className="size-5" />}
-            title="Datum in čas"
-            description="Enodnevni ali večdnevni dogodek. Ura konca je opcijska."
-          >
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <FieldLabel>Datum začetka</FieldLabel>
-                <input
-                  type="date"
-                  required
-                  value={dateStr}
-                  onChange={(e) => setDateStr(e.target.value)}
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <FieldLabel hint="opcijsko">Datum konca</FieldLabel>
-                <input
-                  type="date"
-                  value={dateEndStr}
-                  onChange={(e) => setDateEndStr(e.target.value)}
-                  className={inputCls}
-                />
-              </div>
-            </div>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <FieldLabel>Ura začetka</FieldLabel>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#18201B]/35" />
+            <FormDivider />
+
+            <FormGroup
+              id="crm-event-schedule"
+              title="Termin"
+              description="Za večdnevne dogodke izpolni tudi datum konca."
+            >
+              <div className="crm-event-form__row crm-event-form__row--2">
+                <Field label="Datum začetka" htmlFor="event-date-start">
                   <input
+                    id="event-date-start"
+                    type="date"
+                    required
+                    value={dateStr}
+                    onChange={(e) => setDateStr(e.target.value)}
+                    className="crm-event-form__input"
+                  />
+                </Field>
+                <Field label="Datum konca" hint="opcijsko" htmlFor="event-date-end">
+                  <input
+                    id="event-date-end"
+                    type="date"
+                    value={dateEndStr}
+                    onChange={(e) => setDateEndStr(e.target.value)}
+                    className="crm-event-form__input"
+                  />
+                </Field>
+              </div>
+              <div className="crm-event-form__row crm-event-form__row--2">
+                <Field label="Ura začetka" htmlFor="event-time-start">
+                  <input
+                    id="event-time-start"
                     required
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
                     placeholder="19:00"
-                    className={`${inputCls} pl-9`}
+                    className="crm-event-form__input"
                   />
-                </div>
-              </div>
-              <div>
-                <FieldLabel hint="opcijsko">Ura konca</FieldLabel>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#18201B]/35" />
+                </Field>
+                <Field label="Ura konca" hint="opcijsko" htmlFor="event-time-end">
                   <input
+                    id="event-time-end"
                     value={timeEnd}
                     onChange={(e) => setTimeEnd(e.target.value)}
                     placeholder="22:00"
-                    className={`${inputCls} pl-9`}
+                    className="crm-event-form__input"
                   />
-                </div>
+                </Field>
               </div>
-            </div>
-          </Section>
+            </FormGroup>
 
-          <Section
-            icon={<AlignLeft className="size-5" />}
-            title="Opis"
-            description="Kratek opis je viden na kartici, dolgi pa na strani dogodka."
-          >
-            <div>
-              <FieldLabel hint={`${description.length} znakov`}>Kratek opis</FieldLabel>
-              <textarea
-                required
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="V nekaj stavkih povej, kaj lahko obiskovalec pričakuje."
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <FieldLabel hint="opcijsko">Dolgi opis</FieldLabel>
-              <textarea
-                rows={6}
-                value={longDescription}
-                onChange={(e) => setLongDescription(e.target.value)}
-                placeholder="Podrobnejši opis, program, urnik, razstavljavci..."
-                className={inputCls}
-              />
-            </div>
-          </Section>
+            <FormDivider />
 
-          <Section
-            icon={<Tag className="size-5" />}
-            title="Filter na kartici"
-            description="Izberi en filter — prikazan bo na kartici in strani dogodka."
-          >
-            <div>
-              <FieldLabel>Filter</FieldLabel>
-              <div className="flex flex-wrap gap-2">
-                {CRM_CARD_FILTERS.map((f) => (
-                  <FilterPill
-                    key={f}
-                    label={f}
-                    value={f}
-                    selected={cardFilter === f}
-                    onClick={() => setCardFilter(f)}
-                  />
-                ))}
-              </div>
-            </div>
-          </Section>
+            <FormGroup
+              id="crm-event-content"
+              title="Vsebina"
+              description="Kratek opis na kartici, podrobnosti na strani dogodka."
+            >
+              <Field label="Kratek opis">
+                <textarea
+                  required
+                  rows={3}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="V nekaj stavkih — kaj obiskovalec pričakuje."
+                  className="crm-event-form__textarea"
+                />
+              </Field>
+              <Field label="Podroben opis" hint="opcijsko">
+                <textarea
+                  rows={5}
+                  value={longDescription}
+                  onChange={(e) => setLongDescription(e.target.value)}
+                  placeholder="Program, urnik, dodatne informacije …"
+                  className="crm-event-form__textarea"
+                />
+              </Field>
+            </FormGroup>
 
-          <Section
-            icon={<MapPin className="size-5" />}
-            title="Lokacija"
-            description="Besedilo lokacije. URL zemljevida je opcijski — če ga pustiš prazen, ob shranitvi uporabimo privzeti zemljevid okolice Nazarij."
-          >
-            <div>
-              <FieldLabel>Lokacija (besedilo)</FieldLabel>
-              <input
-                required
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="npr. Osrednji trg, Nazarje"
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <FieldLabel hint="opcijsko · iframe embed">URL zemljevida</FieldLabel>
-              <input
-                value={locationMapUrl}
-                onChange={(e) => setLocationMapUrl(e.target.value)}
-                placeholder="Pusti prazno za privzeti zemljevid ali prilepi svoj OpenStreetMap embed URL …"
-                className={inputCls}
-              />
-              <p className="text-[11px] text-[#18201B]/45 mt-1.5 leading-snug">
-                Privzeti URL se ne prikaže v polju, da ostane pregledno — shranjen je v podatku dogodka, če polje ostane prazno.
-              </p>
-            </div>
-          </Section>
+            <FormDivider />
 
-          <Section
-            icon={<ImageIconLu className="size-5" />}
-            title="Slika dogodka"
-            description="Naloži fotografijo (JPEG, PNG, WebP ali GIF). Prikaže se na kartici in strani dogodka."
-          >
-            <div>
-              <FieldLabel hint="opcijsko">Slika dogodka</FieldLabel>
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept={EVENT_IMAGE_ACCEPT}
-                onChange={onImageFileChange}
-                disabled={saving || uploadingImage}
-                className="block w-full text-sm text-[#18201B] file:mr-3 file:rounded-lg file:border-0 file:bg-[#EAF1EA] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#2F5D46] hover:file:bg-[#dce8dc] disabled:opacity-60"
-              />
-              {selectedImageFile && (
-                <p className="text-[11px] text-[#18201B]/55 mt-1.5 truncate">
-                  Izbrana datoteka: {selectedImageFile.name}
-                </p>
-              )}
-              {uploadingImage && (
-                <p className="text-sm text-[#2F5D46] font-medium mt-2">Nalagam sliko…</p>
-              )}
-              {previewImageUrl && (
-                <div className="mt-3 rounded-lg overflow-hidden border border-[#18201B]/10 bg-[#EAF1EA] aspect-[16/7]">
-                  <img
-                    src={previewImageUrl}
-                    alt="Predogled slike"
-                    className="w-full h-full object-cover"
-                  />
+            <FormGroup id="crm-event-meta" title="Kategorija in lokacija">
+              <Field label="Filter na kartici">
+                <div className="crm-event-form__filters">
+                  {CRM_CARD_FILTERS.map((f) => (
+                    <FilterPill
+                      key={f}
+                      label={f}
+                      value={f}
+                      selected={cardFilter === f}
+                      onClick={() => setCardFilter(f)}
+                      variant="soft"
+                    />
+                  ))}
                 </div>
-              )}
-            </div>
-          </Section>
+              </Field>
+              <Field label="Lokacija" htmlFor="event-location">
+                <input
+                  id="event-location"
+                  required
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  placeholder="npr. Osrednji trg, Nazarje"
+                  className="crm-event-form__input"
+                />
+              </Field>
+            </FormGroup>
 
-          <Section
-            icon={<Paperclip className="size-5" />}
-            title="PDF priponke"
-            description="Dodaj enega ali več PDF dokumentov (npr. program dogodka). Datoteke se naložijo na strežnik ob shranjevanju."
-          >
-            <div>
-              <FieldLabel hint="več datotek">PDF dokumenti</FieldLabel>
-              <input
-                ref={documentInputRef}
-                type="file"
-                accept={EVENT_DOCUMENT_ACCEPT}
-                multiple
-                onChange={onDocumentFileChange}
-                disabled={saving || uploadingDocuments}
-                className="block w-full text-sm text-[#18201B] file:mr-3 file:rounded-lg file:border-0 file:bg-[#EAF1EA] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#2F5D46] hover:file:bg-[#dce8dc] disabled:opacity-60"
-              />
-              {uploadingDocuments && (
-                <p className="text-sm text-[#2F5D46] font-medium mt-2">Nalagam PDF…</p>
-              )}
-            </div>
-            {attachmentItems.length > 0 && (
-              <ul className="space-y-2">
-                {attachmentItems.map((item) => (
-                  <li
-                    key={item.key}
-                    className="flex items-center gap-3 rounded-lg border border-[#18201B]/10 bg-[#FAFAF8] px-3 py-2.5"
-                  >
-                    <span className="inline-flex size-8 items-center justify-center rounded-lg bg-red-50 border border-red-100 shrink-0">
-                      <FileText className="size-4 text-red-500" />
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[#18201B] truncate">{item.name}</p>
-                      {item.pendingFile ? (
-                        <p className="text-[11px] text-[#2F5D46]">Čaka naložitev ob shranjevanju</p>
-                      ) : item.url ? (
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[11px] text-[#3D6F7A] hover:underline truncate block"
-                        >
-                          {item.url}
-                        </a>
-                      ) : null}
+            <FormDivider />
+
+            <FormGroup
+              id="crm-event-media"
+              title="Slika in dokumenti"
+              description="Vse datoteke se naložijo na strežnik ob shranjevanju."
+            >
+              <div className="crm-event-form__media-block">
+                <p className="crm-event-form__subhead">Slika</p>
+                <Field label="Fotografija" hint="opcijsko · JPEG, PNG, WebP, GIF">
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept={EVENT_IMAGE_ACCEPT}
+                    onChange={onImageFileChange}
+                    disabled={saving || uploadingImage}
+                    className="crm-event-form__file"
+                  />
+                  {selectedImageFile && (
+                    <p className="crm-event-form__file-name">{selectedImageFile.name}</p>
+                  )}
+                  {uploadingImage && <p className="crm-event-form__status">Nalagam sliko…</p>}
+                  {previewImageUrl && (
+                    <div className="crm-event-form__image-preview">
+                      <img src={previewImageUrl} alt="Predogled slike" />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => removeAttachment(item.key)}
-                      disabled={saving || uploadingDocuments}
-                      className="inline-flex size-8 items-center justify-center rounded-lg text-[#18201B]/45 hover:text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50 shrink-0"
-                      aria-label={`Odstrani ${item.name}`}
-                    >
-                      <Trash2 className="size-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Section>
+                  )}
+                </Field>
+              </div>
+              <div className="crm-event-form__media-block">
+                <p className="crm-event-form__subhead">PDF priponke</p>
+                <Field label="Dokumenti" hint="opcijsko · več datotek">
+                  <input
+                    ref={documentInputRef}
+                    type="file"
+                    accept={EVENT_DOCUMENT_ACCEPT}
+                    multiple
+                    onChange={onDocumentFileChange}
+                    disabled={saving || uploadingDocuments}
+                    className="crm-event-form__file"
+                  />
+                  {uploadingDocuments && <p className="crm-event-form__status">Nalagam PDF…</p>}
+                </Field>
+                {attachmentItems.length > 0 && (
+                  <ul className="crm-event-form__attachments">
+                    {attachmentItems.map((item) => (
+                      <li key={item.key} className="crm-event-form__attachment">
+                        <span className="crm-event-form__attachment-icon" aria-hidden>
+                          <FileText />
+                        </span>
+                        <div className="crm-event-form__attachment-info">
+                          <p className="crm-event-form__attachment-name">{item.name}</p>
+                          <p className="crm-event-form__attachment-meta">
+                            {item.pendingFile ? (
+                              'Naloži se ob shranjevanju'
+                            ) : item.url ? (
+                              <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                Odpri datoteko
+                              </a>
+                            ) : null}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeAttachment(item.key)}
+                          disabled={saving || uploadingDocuments}
+                          className="crm-event-form__attachment-remove"
+                          aria-label={`Odstrani ${item.name}`}
+                        >
+                          <Trash2 />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </FormGroup>
 
-          {saveError && (
-            <p className="text-sm text-red-700 rounded-lg bg-red-50 border border-red-100 px-4 py-3">
-              {saveError}
-            </p>
-          )}
+            <details className="crm-event-form__advanced">
+              <summary className="crm-event-form__advanced-summary">
+                Dodatne nastavitve
+              </summary>
+              <div className="crm-event-form__advanced-body">
+                <Field label="Slug (URL)" hint="opcijsko" htmlFor="event-slug">
+                  <input
+                    id="event-slug"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    placeholder="poletni-koncert-nazarje"
+                    className="crm-event-form__input"
+                  />
+                </Field>
+                <Field label="URL zemljevida" hint="opcijsko">
+                  <input
+                    value={locationMapUrl}
+                    onChange={(e) => setLocationMapUrl(e.target.value)}
+                    placeholder="Prazno = privzeti zemljevid Nazarij"
+                    className="crm-event-form__input"
+                  />
+                  <p className="crm-event-form__helper">
+                    OpenStreetMap embed URL. Če pustiš prazno, se uporabi privzeti zemljevid.
+                  </p>
+                </Field>
+              </div>
+            </details>
+          </div>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          {saveError && <p className="crm-event-form__error">{saveError}</p>}
+
+          <div className="crm-event-form__actions">
             <button
               type="submit"
               disabled={saving || uploadingImage || uploadingDocuments}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#2F5D46] px-5 py-3 text-white text-sm font-medium shadow-sm hover:bg-[#1E3A2F] transition-colors disabled:opacity-60"
+              className="crm-event-form__btn crm-event-form__btn--primary"
             >
-              <Save className="size-4" />
-              {uploadingImage
-                ? 'Nalagam sliko…'
-                : uploadingDocuments
-                  ? 'Nalagam PDF…'
-                  : saving
-                  ? 'Shranjujem…'
-                  : isEdit
-                    ? 'Shrani spremembe'
-                    : 'Shrani dogodek'}
+              <Save />
+              {saveLabel}
             </button>
-            <Link
-              to={backPath}
-              className="inline-flex items-center gap-2 rounded-xl border border-[#18201B]/15 bg-white px-5 py-3 text-sm text-[#18201B] hover:bg-[#F7F4EE] transition-colors"
-            >
-              <X className="size-4" />
+            <Link to={backPath} className="crm-event-form__btn crm-event-form__btn--ghost">
+              <X />
               Prekliči
             </Link>
             {isEdit && (
@@ -729,50 +695,49 @@ export function CrmEventForm() {
                 type="button"
                 disabled={saving}
                 onClick={onDelete}
-                className="ml-auto inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm text-red-800 hover:bg-red-100 transition-colors disabled:opacity-60"
+                className="crm-event-form__btn crm-event-form__btn--danger"
               >
-                <Trash2 className="size-4" />
+                <Trash2 />
                 Izbriši
               </button>
             )}
           </div>
         </div>
 
-        <aside className="lg:sticky lg:top-20 self-start">
-          <div className="rounded-2xl border border-[#18201B]/10 bg-white shadow-sm overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 pt-4 pb-0">
-              <span className="text-xs uppercase tracking-widest text-[#18201B]/50">Predogled</span>
-              <span className="text-[11px] text-[#18201B]/40 italic">v živo</span>
+        <aside className="crm-event-form__preview" aria-label="Predogled dogodka">
+          <div className="crm-event-form__preview-card">
+            <div className="crm-event-form__preview-head">
+              <p className="crm-event-form__preview-title">Predogled</p>
+              <p className="crm-event-form__preview-desc">
+                {previewTab === 'card'
+                  ? 'Kartica med prihajajočimi dogodki.'
+                  : 'Stran po kliku na Preberi več.'}
+              </p>
             </div>
-
-            {/* Tabs */}
-            <div className="flex gap-1 px-4 pt-3 pb-0">
+            <div className="crm-event-form__preview-tabs" role="tablist">
               {(
                 [
-                  { id: 'card', label: 'Kartica' },
-                  { id: 'detail', label: 'Stran dogodka' },
-                ] as const
+                  { id: 'card' as const, label: 'Kartica' },
+                  { id: 'detail' as const, label: 'Stran dogodka' },
+                ]
               ).map((tab) => (
                 <button
                   key={tab.id}
                   type="button"
+                  role="tab"
+                  aria-selected={previewTab === tab.id}
                   onClick={() => setPreviewTab(tab.id)}
-                  className={`flex-1 rounded-lg py-2 text-[13px] font-medium transition-colors ${
-                    previewTab === tab.id
-                      ? 'bg-[#2F5D46] text-white shadow-sm'
-                      : 'bg-[#F7F4EE] text-[#18201B]/65 hover:text-[#18201B]'
+                  className={`crm-event-form__preview-tab${
+                    previewTab === tab.id ? ' crm-event-form__preview-tab--active' : ''
                   }`}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
-
-            {/* Preview body */}
-            <div className="p-4">
-              {previewTab === 'card' ? (
-                <div className="bg-[#EAF1EA] rounded-xl p-4">
+            <div className="crm-event-form__preview-body">
+              <div className="crm-event-form__preview-frame">
+                {previewTab === 'card' ? (
                   <EventCardPreview
                     title={title}
                     date={previewDate}
@@ -785,28 +750,22 @@ export function CrmEventForm() {
                     location={location}
                     attachmentCount={attachmentCount}
                   />
-                </div>
-              ) : (
-                <EventDetailPreview
-                  title={title}
-                  date={previewDate}
-                  dateEnd={previewDateEnd}
-                  time={time}
-                  timeEnd={timeEnd}
-                  longDescription={longDescription}
-                  cardFilter={cardFilter}
-                  imageUrl={previewImageUrl}
-                  location={location}
-                  attachments={previewAttachments}
-                />
-              )}
+                ) : (
+                  <EventDetailPreview
+                    title={title}
+                    date={previewDate}
+                    dateEnd={previewDateEnd}
+                    time={time}
+                    timeEnd={timeEnd}
+                    longDescription={longDescription}
+                    cardFilter={cardFilter}
+                    imageUrl={previewImageUrl}
+                    location={location}
+                    attachments={previewAttachments}
+                  />
+                )}
+              </div>
             </div>
-
-            <p className="text-[11px] text-[#18201B]/40 text-center pb-4 px-4 leading-snug">
-              {previewTab === 'card'
-                ? 'Kartica na domači strani med prihajajočimi dogodki.'
-                : 'Stran, ki jo obiskovalec vidi, ko klikne »Preberi več«.'}
-            </p>
           </div>
         </aside>
       </form>
