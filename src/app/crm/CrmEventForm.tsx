@@ -1,8 +1,7 @@
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import {
   AlignLeft,
-  AlertTriangle,
   Calendar as CalendarIcon,
   Clock,
   FileText,
@@ -21,10 +20,21 @@ import {
   adminDeleteEvent,
   adminFetchEvent,
   adminUpdateEvent,
+  EVENT_DOCUMENT_ACCEPT,
+  EVENT_IMAGE_ACCEPT,
+  isAcceptedEventDocumentType,
+  isAcceptedEventImageType,
+  uploadEventDocument,
+  uploadEventImage,
 } from '../api/admin';
 import { newCrmEventId, toDateInputValue } from '../api/mappers';
 import { ApiError } from '../api/client';
-import { CRM_CATEGORIES, DEFAULT_MAP_EMBED } from './crm-constants';
+import {
+  cardFilterFromEvent,
+  CRM_CARD_FILTERS,
+  DEFAULT_MAP_EMBED,
+  payloadFromCardFilter,
+} from './crm-constants';
 import { getLastListPath, type CrmBackState } from './crm-nav';
 import { FilterPill } from './FilterPill';
 import { EventCardPreview } from './EventCardPreview';
@@ -75,6 +85,39 @@ function FieldLabel({ children, hint }: { children: ReactNode; hint?: string }) 
 const inputCls =
   'w-full rounded-lg border border-[#18201B]/18 bg-[#FAFAF8] px-3 py-2.5 text-sm text-[#18201B] placeholder:text-[#18201B]/35 outline-none focus:border-[#2F5D46]/50 focus:ring-1 focus:ring-[#2F5D46]/25';
 
+type FormAttachment = {
+  key: string;
+  name: string;
+  url?: string;
+  pendingFile?: File;
+};
+
+function createAttachmentKey(): string {
+  return `att-${typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`}`;
+}
+
+function isPdfFile(file: File): boolean {
+  return isAcceptedEventDocumentType(file.type) || file.name.toLowerCase().endsWith('.pdf');
+}
+
+async function resolveFormAttachments(
+  items: FormAttachment[]
+): Promise<{ name: string; url: string }[]> {
+  const result: { name: string; url: string }[] = [];
+  for (const item of items) {
+    if (item.pendingFile) {
+      const uploaded = await uploadEventDocument(item.pendingFile);
+      result.push({
+        name: uploaded.original_name || item.name,
+        url: uploaded.url,
+      });
+    } else if (item.url) {
+      result.push({ name: item.name, url: item.url });
+    }
+  }
+  return result;
+}
+
 export function CrmEventForm() {
   const { id } = useParams<{ id: string }>();
   const routerLocation = useLocation();
@@ -91,14 +134,17 @@ export function CrmEventForm() {
   const [timeEnd, setTimeEnd] = useState('');
   const [description, setDescription] = useState('');
   const [longDescription, setLongDescription] = useState('');
-  const [category, setCategory] = useState<string>('Kultura');
-  const [secondaryFilter, setSecondaryFilter] = useState<string>('');
+  const [cardFilter, setCardFilter] = useState<string>('Kultura');
   const [location, setLocation] = useState('');
   const [locationMapUrl, setLocationMapUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [isImportant, setIsImportant] = useState(false);
-  const [attachName, setAttachName] = useState('');
-  const [attachUrl, setAttachUrl] = useState('');
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
+  const [attachmentItems, setAttachmentItems] = useState<FormAttachment[]>([]);
+  const [uploadingDocuments, setUploadingDocuments] = useState(false);
   const [published, setPublished] = useState(true);
   const [slug, setSlug] = useState('');
   const [notFound, setNotFound] = useState(false);
@@ -124,17 +170,30 @@ export function CrmEventForm() {
         setTimeEnd(existing.timeEnd ?? '');
         setDescription(existing.description);
         setLongDescription(existing.longDescription);
-        setCategory(existing.category);
-        setSecondaryFilter(existing.secondaryFilter ?? '');
+        setCardFilter(cardFilterFromEvent(existing));
         setLocation(existing.location);
         setLocationMapUrl(existing.locationMapUrl ?? '');
         setImageUrl(existing.imageUrl ?? '');
-        setIsImportant(Boolean(existing.isImportant));
+        setSelectedImageFile(null);
+        setLocalPreviewUrl((prev) => {
+          if (prev?.startsWith('blob:')) URL.revokeObjectURL(prev);
+          return null;
+        });
+        if (imageInputRef.current) {
+          imageInputRef.current.value = '';
+        }
         setPublished(existing.published !== false);
         setSlug(existing.slug ?? '');
-        const a = existing.attachments?.[0];
-        setAttachName(a?.name ?? '');
-        setAttachUrl(a?.url ?? '');
+        setAttachmentItems(
+          (existing.attachments ?? []).map((a, i) => ({
+            key: `saved-${i}-${a.url}`,
+            name: a.name,
+            url: a.url,
+          }))
+        );
+        if (documentInputRef.current) {
+          documentInputRef.current.value = '';
+        }
       } catch (e) {
         if (cancelled) return;
         setNotFound(true);
@@ -151,14 +210,98 @@ export function CrmEventForm() {
 
   const previewDate = useMemo(() => fromDateInput(dateStr), [dateStr]);
   const previewDateEnd = useMemo(() => fromDateInput(dateEndStr), [dateEndStr]);
-  const hasAttachment = Boolean(attachName.trim() && attachUrl.trim());
+  const attachmentCount = attachmentItems.length;
+  const previewAttachments = useMemo(
+    () =>
+      attachmentItems.map((a) => ({
+        name: a.name,
+        url: a.url,
+      })),
+    [attachmentItems]
+  );
+  const previewImageUrl = localPreviewUrl ?? (imageUrl.trim() || undefined);
 
-  const buildPayload = (eventId: string): EventData => {
+  useEffect(() => {
+    return () => {
+      if (localPreviewUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(localPreviewUrl);
+      }
+    };
+  }, [localPreviewUrl]);
+
+  const clearLocalImagePreview = () => {
+    if (localPreviewUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(localPreviewUrl);
+    }
+    setLocalPreviewUrl(null);
+    setSelectedImageFile(null);
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
+    }
+  };
+
+  const onImageFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!isAcceptedEventImageType(file.type)) {
+      setSaveError('Dovoljene so le slike JPEG, PNG, WebP ali GIF.');
+      e.target.value = '';
+      return;
+    }
+
+    if (localPreviewUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(localPreviewUrl);
+    }
+    setSelectedImageFile(file);
+    setLocalPreviewUrl(URL.createObjectURL(file));
+    setSaveError(null);
+  };
+
+  const onDocumentFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files?.length) return;
+
+    const added: FormAttachment[] = [];
+    let rejected = false;
+    for (const file of Array.from(files)) {
+      if (!isPdfFile(file)) {
+        rejected = true;
+        continue;
+      }
+      added.push({
+        key: createAttachmentKey(),
+        name: file.name,
+        pendingFile: file,
+      });
+    }
+
+    if (rejected) {
+      setSaveError('Dovoljene so le datoteke PDF.');
+    } else if (added.length) {
+      setSaveError(null);
+    }
+
+    if (added.length) {
+      setAttachmentItems((prev) => [...prev, ...added]);
+    }
+    e.target.value = '';
+  };
+
+  const removeAttachment = (key: string) => {
+    setAttachmentItems((prev) => prev.filter((a) => a.key !== key));
+  };
+
+  const buildPayload = (
+    eventId: string,
+    finalImageUrl?: string,
+    resolvedAttachments?: { name: string; url: string }[]
+  ): EventData => {
     const date = fromDateInput(dateStr) ?? new Date();
     const dateEnd = fromDateInput(dateEndStr) ?? undefined;
-    const attachments = hasAttachment
-      ? [{ name: attachName.trim(), url: attachUrl.trim() }]
-      : undefined;
+    const attachments =
+      resolvedAttachments && resolvedAttachments.length > 0 ? resolvedAttachments : undefined;
+    const filterFields = payloadFromCardFilter(cardFilter);
 
     return {
       id: eventId,
@@ -169,13 +312,12 @@ export function CrmEventForm() {
       timeEnd: timeEnd.trim() || undefined,
       description: description.trim(),
       longDescription: longDescription.trim() || description.trim(),
-      category,
-      secondaryFilter:
-        isImportant && secondaryFilter.trim() ? secondaryFilter.trim() : undefined,
+      category: filterFields.category,
+      secondaryFilter: filterFields.secondaryFilter,
       location: location.trim(),
       locationMapUrl: locationMapUrl.trim() || DEFAULT_MAP_EMBED,
-      isImportant,
-      imageUrl: imageUrl.trim() || undefined,
+      isImportant: filterFields.isImportant,
+      imageUrl: finalImageUrl ?? (imageUrl.trim() || undefined),
       attachments,
       published,
       slug: slug.trim() || undefined,
@@ -186,9 +328,37 @@ export function CrmEventForm() {
     e.preventDefault();
     setSaveError(null);
     setSaving(true);
+    setUploadingImage(false);
+    setUploadingDocuments(false);
     try {
       const eventId = isEdit && id ? id : newCrmEventId();
-      const payload = buildPayload(eventId);
+      let finalImageUrl = imageUrl.trim() || undefined;
+
+      if (selectedImageFile) {
+        setUploadingImage(true);
+        finalImageUrl = await uploadEventImage(selectedImageFile);
+        setUploadingImage(false);
+        setImageUrl(finalImageUrl);
+        clearLocalImagePreview();
+      }
+
+      if (attachmentItems.some((a) => a.pendingFile)) {
+        setUploadingDocuments(true);
+      }
+      const resolvedAttachments = await resolveFormAttachments(attachmentItems);
+      setUploadingDocuments(false);
+      setAttachmentItems(
+        resolvedAttachments.map((a, i) => ({
+          key: `saved-${i}-${a.url}`,
+          name: a.name,
+          url: a.url,
+        }))
+      );
+      if (documentInputRef.current) {
+        documentInputRef.current.value = '';
+      }
+
+      const payload = buildPayload(eventId, finalImageUrl, resolvedAttachments);
       const saved = isEdit
         ? await adminUpdateEvent(payload)
         : await adminCreateEvent(payload);
@@ -197,6 +367,8 @@ export function CrmEventForm() {
         state: { from: backPath },
       });
     } catch (err) {
+      setUploadingImage(false);
+      setUploadingDocuments(false);
       setSaveError(
         err instanceof ApiError
           ? err.message
@@ -204,6 +376,8 @@ export function CrmEventForm() {
       );
     } finally {
       setSaving(false);
+      setUploadingImage(false);
+      setUploadingDocuments(false);
     }
   };
 
@@ -377,83 +551,22 @@ export function CrmEventForm() {
 
           <Section
             icon={<Tag className="size-5" />}
-            title="Filtri na kartici"
-            description="Izberi eno kategorijo. Če je dogodek nujen, lahko dodaš še en filter."
+            title="Filter na kartici"
+            description="Izberi en filter — prikazan bo na kartici in strani dogodka."
           >
             <div>
-              <FieldLabel>Glavni filter (kategorija)</FieldLabel>
+              <FieldLabel>Filter</FieldLabel>
               <div className="flex flex-wrap gap-2">
-                {CRM_CATEGORIES.map((c) => (
+                {CRM_CARD_FILTERS.map((f) => (
                   <FilterPill
-                    key={c}
-                    label={c}
-                    value={c}
-                    selected={category === c}
-                    onClick={() => setCategory(c)}
+                    key={f}
+                    label={f}
+                    value={f}
+                    selected={cardFilter === f}
+                    onClick={() => setCardFilter(f)}
                   />
                 ))}
               </div>
-            </div>
-
-            <div className="rounded-xl border border-[#18201B]/10 bg-[#F7F4EE]/60 p-3">
-              <button
-                type="button"
-                onClick={() => {
-                  const v = !isImportant;
-                  setIsImportant(v);
-                  if (!v) setSecondaryFilter('');
-                }}
-                aria-pressed={isImportant}
-                className={`w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 transition-colors ${
-                  isImportant
-                    ? 'bg-[#9B3A32] text-white'
-                    : 'bg-white text-[#18201B] border border-[#18201B]/10 hover:border-[#9B3A32]/40'
-                }`}
-              >
-                <span className="flex items-center gap-2 text-sm font-medium">
-                  <AlertTriangle className="size-4" />
-                  Nujen / pomemben dogodek
-                </span>
-                <span
-                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] ${
-                    isImportant ? 'bg-white/20' : 'bg-[#18201B]/5 text-[#18201B]/55'
-                  }`}
-                >
-                  {isImportant ? 'Vklopljeno' : 'Izklopljeno'}
-                </span>
-              </button>
-
-              {isImportant && (
-                <div className="mt-3 pt-3 border-t border-[#18201B]/10">
-                  <FieldLabel hint="opcijsko">Drugi filter</FieldLabel>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSecondaryFilter('')}
-                      aria-pressed={secondaryFilter === ''}
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
-                        secondaryFilter === ''
-                          ? 'bg-[#9B3A32] text-white border-[#9B3A32]'
-                          : 'bg-white text-[#18201B] border-[#18201B]/15 hover:border-[#9B3A32]/40'
-                      }`}
-                    >
-                      <AlertTriangle className="size-3.5" />
-                      Samo «Nujno»
-                    </button>
-                    {CRM_CATEGORIES.map((c) => (
-                      <FilterPill
-                        key={c}
-                        label={c}
-                        value={c}
-                        selected={secondaryFilter === c}
-                        onClick={() =>
-                          setSecondaryFilter((prev) => (prev === c ? '' : c))
-                        }
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </Section>
 
@@ -488,20 +601,34 @@ export function CrmEventForm() {
 
           <Section
             icon={<ImageIconLu className="size-5" />}
-            title="Slika"
-            description="URL naslovne fotografije, ki se prikaže na kartici in v heroju."
+            title="Slika dogodka"
+            description="Naloži fotografijo (JPEG, PNG, WebP ali GIF). Prikaže se na kartici in strani dogodka."
           >
             <div>
-              <FieldLabel hint="opcijsko">URL slike</FieldLabel>
+              <FieldLabel hint="opcijsko">Slika dogodka</FieldLabel>
               <input
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://..."
-                className={inputCls}
+                ref={imageInputRef}
+                type="file"
+                accept={EVENT_IMAGE_ACCEPT}
+                onChange={onImageFileChange}
+                disabled={saving || uploadingImage}
+                className="block w-full text-sm text-[#18201B] file:mr-3 file:rounded-lg file:border-0 file:bg-[#EAF1EA] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#2F5D46] hover:file:bg-[#dce8dc] disabled:opacity-60"
               />
-              {imageUrl && (
+              {selectedImageFile && (
+                <p className="text-[11px] text-[#18201B]/55 mt-1.5 truncate">
+                  Izbrana datoteka: {selectedImageFile.name}
+                </p>
+              )}
+              {uploadingImage && (
+                <p className="text-sm text-[#2F5D46] font-medium mt-2">Nalagam sliko…</p>
+              )}
+              {previewImageUrl && (
                 <div className="mt-3 rounded-lg overflow-hidden border border-[#18201B]/10 bg-[#EAF1EA] aspect-[16/7]">
-                  <img src={imageUrl} alt="Predogled slike" className="w-full h-full object-cover" />
+                  <img
+                    src={previewImageUrl}
+                    alt="Predogled slike"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               )}
             </div>
@@ -509,32 +636,62 @@ export function CrmEventForm() {
 
           <Section
             icon={<Paperclip className="size-5" />}
-            title="Priloga"
-            description="Opcijska ena datoteka (npr. program v PDF)."
+            title="PDF priponke"
+            description="Dodaj enega ali več PDF dokumentov (npr. program dogodka). Datoteke se naložijo na strežnik ob shranjevanju."
           >
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div>
-                <FieldLabel>Ime datoteke</FieldLabel>
-                <input
-                  value={attachName}
-                  onChange={(e) => setAttachName(e.target.value)}
-                  placeholder="npr. Program sejma (PDF)"
-                  className={inputCls}
-                />
-              </div>
-              <div>
-                <FieldLabel>Povezava</FieldLabel>
-                <div className="relative">
-                  <FileText className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-[#18201B]/35" />
-                  <input
-                    value={attachUrl}
-                    onChange={(e) => setAttachUrl(e.target.value)}
-                    placeholder="https://..."
-                    className={`${inputCls} pl-9`}
-                  />
-                </div>
-              </div>
+            <div>
+              <FieldLabel hint="več datotek">PDF dokumenti</FieldLabel>
+              <input
+                ref={documentInputRef}
+                type="file"
+                accept={EVENT_DOCUMENT_ACCEPT}
+                multiple
+                onChange={onDocumentFileChange}
+                disabled={saving || uploadingDocuments}
+                className="block w-full text-sm text-[#18201B] file:mr-3 file:rounded-lg file:border-0 file:bg-[#EAF1EA] file:px-3 file:py-2 file:text-sm file:font-medium file:text-[#2F5D46] hover:file:bg-[#dce8dc] disabled:opacity-60"
+              />
+              {uploadingDocuments && (
+                <p className="text-sm text-[#2F5D46] font-medium mt-2">Nalagam PDF…</p>
+              )}
             </div>
+            {attachmentItems.length > 0 && (
+              <ul className="space-y-2">
+                {attachmentItems.map((item) => (
+                  <li
+                    key={item.key}
+                    className="flex items-center gap-3 rounded-lg border border-[#18201B]/10 bg-[#FAFAF8] px-3 py-2.5"
+                  >
+                    <span className="inline-flex size-8 items-center justify-center rounded-lg bg-red-50 border border-red-100 shrink-0">
+                      <FileText className="size-4 text-red-500" />
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[#18201B] truncate">{item.name}</p>
+                      {item.pendingFile ? (
+                        <p className="text-[11px] text-[#2F5D46]">Čaka naložitev ob shranjevanju</p>
+                      ) : item.url ? (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[11px] text-[#3D6F7A] hover:underline truncate block"
+                        >
+                          {item.url}
+                        </a>
+                      ) : null}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(item.key)}
+                      disabled={saving || uploadingDocuments}
+                      className="inline-flex size-8 items-center justify-center rounded-lg text-[#18201B]/45 hover:text-red-700 hover:bg-red-50 transition-colors disabled:opacity-50 shrink-0"
+                      aria-label={`Odstrani ${item.name}`}
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Section>
 
           {saveError && (
@@ -546,11 +703,19 @@ export function CrmEventForm() {
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || uploadingImage || uploadingDocuments}
               className="inline-flex items-center gap-2 rounded-xl bg-[#2F5D46] px-5 py-3 text-white text-sm font-medium shadow-sm hover:bg-[#1E3A2F] transition-colors disabled:opacity-60"
             >
               <Save className="size-4" />
-              {saving ? 'Shranjujem…' : isEdit ? 'Shrani spremembe' : 'Shrani dogodek'}
+              {uploadingImage
+                ? 'Nalagam sliko…'
+                : uploadingDocuments
+                  ? 'Nalagam PDF…'
+                  : saving
+                  ? 'Shranjujem…'
+                  : isEdit
+                    ? 'Shrani spremembe'
+                    : 'Shrani dogodek'}
             </button>
             <Link
               to={backPath}
@@ -615,12 +780,10 @@ export function CrmEventForm() {
                     time={time}
                     timeEnd={timeEnd}
                     description={description}
-                    category={category}
-                    secondaryFilter={isImportant ? secondaryFilter || undefined : undefined}
-                    isImportant={isImportant}
-                    imageUrl={imageUrl.trim() || undefined}
+                    cardFilter={cardFilter}
+                    imageUrl={previewImageUrl}
                     location={location}
-                    hasAttachment={hasAttachment}
+                    attachmentCount={attachmentCount}
                   />
                 </div>
               ) : (
@@ -631,13 +794,10 @@ export function CrmEventForm() {
                   time={time}
                   timeEnd={timeEnd}
                   longDescription={longDescription}
-                  category={category}
-                  secondaryFilter={isImportant ? secondaryFilter || undefined : undefined}
-                  isImportant={isImportant}
-                  imageUrl={imageUrl.trim() || undefined}
+                  cardFilter={cardFilter}
+                  imageUrl={previewImageUrl}
                   location={location}
-                  attachName={attachName}
-                  attachUrl={attachUrl}
+                  attachments={previewAttachments}
                 />
               )}
             </div>
