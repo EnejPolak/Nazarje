@@ -24,6 +24,8 @@ interface EventCardProps {
   onClick?: () => void;
   grayscale?: boolean;
   index?: number;
+  /** Besedilo gumba (privzeto: Preberi več) */
+  ctaLabel?: string;
 }
 
 function truncateWords(text: string, maxWords: number) {
@@ -36,7 +38,13 @@ function truncateWords(text: string, maxWords: number) {
   return `${words.slice(0, maxWords).join(' ')}...`;
 }
 
-export function EventCard({ event, onClick, grayscale, index = 0 }: EventCardProps) {
+export function EventCard({
+  event,
+  onClick,
+  grayscale,
+  index = 0,
+  ctaLabel = 'Preberi več',
+}: EventCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 28 }}
@@ -93,8 +101,8 @@ export function EventCard({ event, onClick, grayscale, index = 0 }: EventCardPro
           </div>
         )}
 
-        <button className="event-card__button">
-          Preberi več
+        <button type="button" className="event-card__button">
+          {ctaLabel}
           <ChevronRight className="event-card__button-icon" />
         </button>
       </div>

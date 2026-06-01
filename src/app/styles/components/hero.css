@@ -4,8 +4,8 @@
 
 .public-hero__frame {
   position: relative;
-  aspect-ratio: 15 / 9;
   width: 100%;
+  height: 100vh;
   overflow: hidden;
 }
 
@@ -18,40 +18,51 @@
 }
 
 .public-hero__frame::before {
-  background: url('../../assets/nazarje-slika.jpg') center / cover no-repeat;
+  background: url('../../assets/nazarje-slika.jpg') center 10% / cover no-repeat;
 }
 
 .public-hero__content {
   position: absolute;
   z-index: 1;
   inset: 0;
-  max-width: 80rem;
-  margin: 0 auto;
-  padding: calc(4rem + clamp(1.5rem, 4vw, 4rem)) 1.5rem clamp(1.5rem, 4vw, 4rem);
-  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: clamp(1.5rem, 4vw, 4rem);
+  pointer-events: none;
 }
 
 .public-hero__title {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  margin: 0;
-  width: auto;
+  container-type: inline-size;
+  width: 100%;
+  max-width: 80.8rem;
+  margin: 0 auto;
+  padding-inline: var(--page-content-padding);
+  box-sizing: border-box;
   color: #fff;
-  font-size: clamp(3rem, 10vw, 9rem);
+  font-size: 6.5rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 0.95;
-  text-align: left;
-  text-shadow: none;
+  line-height: 1;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
 }
 
-.public-hero__title span {
-  display: block;
+.public-hero__title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  white-space: nowrap;
 }
 
-.public-hero__title-line--offset {
-  margin-top: 15rem;
-  text-align: right;
+.public-hero__title-row span {
+  display: inline-block;
+  flex: 0 0 auto;
 }
 
+@media (max-width: 768px) {
+  .public-hero__title {
+    padding-inline: var(--page-content-padding);
+    font-size: clamp(1.5rem, 7cqi, 3.25rem);
+  }
+
+}

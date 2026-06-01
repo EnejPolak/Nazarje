@@ -78,7 +78,7 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
     : 'Prihajajoči dogodki';
 
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-0 bg-white rounded-2xl shadow-md border border-[#1E3A2F]/8 overflow-hidden">
+    <div className="w-full flex flex-col lg:flex-row gap-0 bg-white shadow-md border border-[#1E3A2F]/8 overflow-hidden">
       {/* Left: Calendar */}
       <div className="flex-1 p-5 lg:p-6 min-w-0 flex flex-col">
         {/* Calendar Header */}
@@ -95,7 +95,7 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
           <div className="flex items-center gap-1">
             <button
               onClick={previousMonth}
-              className="w-7 h-7 flex items-center justify-center hover:bg-[#EAF1EA] rounded-lg transition-colors"
+              className="w-7 h-7 flex items-center justify-center hover:bg-[#EAF1EA] transition-colors"
               aria-label="Prejšnji mesec"
             >
               <ChevronLeft className="w-4 h-4 text-[#1E3A2F]" />
@@ -105,13 +105,13 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
                 setCurrentDate(new Date());
                 setSelectedDay(new Date().getDate());
               }}
-              className="px-2.5 h-7 text-xs text-[#2F5D46] bg-[#EAF1EA] hover:bg-[#d4e8d4] rounded-lg transition-colors"
+              className="px-2.5 h-7 text-xs text-[#2F5D46] bg-[#EAF1EA] hover:bg-[#d4e8d4] transition-colors"
             >
               Danes
             </button>
             <button
               onClick={nextMonth}
-              className="w-7 h-7 flex items-center justify-center hover:bg-[#EAF1EA] rounded-lg transition-colors"
+              className="w-7 h-7 flex items-center justify-center hover:bg-[#EAF1EA] transition-colors"
               aria-label="Naslednji mesec"
             >
               <ChevronRight className="w-4 h-4 text-[#1E3A2F]" />
@@ -130,9 +130,9 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
           ].map((item) => (
             <div
               key={item.label}
-              className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#F7F4EE]"
+              className="flex items-center gap-1.5 px-2 py-0.5 bg-[#F7F4EE]"
             >
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+              <span className="w-1.5 h-1.5 shrink-0" style={{ backgroundColor: item.color }} />
               <span className="text-[10px]" style={{ color: item.color }}>{item.label}</span>
             </div>
           ))}
@@ -175,7 +175,7 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
               <button
                 key={day}
                 onClick={() => setSelectedDay(isSelected ? null : day)}
-                className={`relative h-16 flex flex-col items-center justify-start pt-1.5 px-1 rounded-xl transition-all cursor-pointer
+                className={`relative h-16 flex flex-col items-center justify-start pt-1.5 px-1 transition-all cursor-pointer
                   ${isSelected
                     ? hasEvents ? '' : 'bg-[#1E3A2F]'
                     : isTodayDate
@@ -217,7 +217,7 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
                 {/* Multiple events indicator */}
                 {dayEvents.length > 1 && (
                   <div
-                    className="absolute bottom-1 right-1 text-[8px] px-1 py-0.5 rounded-full text-white"
+                    className="absolute bottom-1 right-1 text-[8px] px-1 py-0.5 text-white"
                     style={{ backgroundColor: isSelected ? 'rgba(0,0,0,0.2)' : eventColor }}
                   >
                     +{dayEvents.length - 1}
@@ -255,11 +255,11 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
               return (
                 <div
                   key={event.id}
-                  className="group flex gap-3 p-3 rounded-xl hover:bg-[#F7F4EE] transition-colors cursor-pointer"
+                  className="group flex gap-3 p-3 hover:bg-[#F7F4EE] transition-colors cursor-pointer"
                   onClick={() => onEventClick?.(event.id)}
                 >
                   <div
-                    className="w-0.5 rounded-full shrink-0 self-stretch"
+                    className="w-0.5 shrink-0 self-stretch"
                     style={{ backgroundColor: color }}
                   />
                   <div className="flex-1 min-w-0">

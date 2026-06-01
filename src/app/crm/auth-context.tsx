@@ -1,49 +1,71 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { adminLogin } from '../api/admin';
+import { ApiError } from '../api/client';
+import type { ApiAdminUser } from '../api/types';
 
-const SESSION_KEY = 'crm-seja';
+const TOKEN_KEY = 'admin_token';
+const USER_KEY = 'admin_user';
 
 type CrmAuthContextValue = {
   isAuthenticated: boolean;
-  login: (email: string, password: string) => boolean;
+  user: ApiAdminUser | null;
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => void;
 };
 
 const CrmAuthContext = createContext<CrmAuthContextValue | null>(null);
 
-function readSession(): boolean {
+function readToken(): boolean {
   try {
-    return sessionStorage.getItem(SESSION_KEY) === '1';
+    return !!localStorage.getItem(TOKEN_KEY);
   } catch {
     return false;
   }
 }
 
-/** Začasno za ročno testiranje — pred produkcijo zamenjaj z backend prijavo. */
-const DEMO_EMAIL = 'test@test';
-const DEMO_PASSWORD = 'test12345';
+function readUser(): ApiAdminUser | null {
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as ApiAdminUser;
+  } catch {
+    return null;
+  }
+}
 
 export function CrmAuthProvider({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(readSession);
+  const [isAuthenticated, setIsAuthenticated] = useState(readToken);
+  const [user, setUser] = useState<ApiAdminUser | null>(readUser);
 
-  const login = useCallback((email: string, password: string) => {
-    const ok =
-      email.trim().toLowerCase() === DEMO_EMAIL.toLowerCase() && password === DEMO_PASSWORD;
-    if (ok) {
-      sessionStorage.setItem(SESSION_KEY, '1');
+  const login = useCallback(async (email: string, password: string) => {
+    try {
+      const { token, user: loggedInUser } = await adminLogin(email, password);
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(USER_KEY, JSON.stringify(loggedInUser));
       setIsAuthenticated(true);
-      return true;
+      setUser(loggedInUser);
+      return { ok: true };
+    } catch (e) {
+      const msg =
+        e instanceof ApiError
+          ? e.status === 401 || /invalid email or password/i.test(e.message)
+            ? 'Napačen e-poštni naslov ali geslo.'
+            : e.message
+          : 'Prijava ni uspela. Preverite povezavo z API-jem.';
+      return { ok: false, error: msg };
     }
-    return false;
   }, []);
 
   const logout = useCallback(() => {
-    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
     setIsAuthenticated(false);
+    setUser(null);
   }, []);
 
   const value = useMemo(
-    () => ({ isAuthenticated, login, logout }),
-    [isAuthenticated, login, logout]
+    () => ({ isAuthenticated, user, login, logout }),
+    [isAuthenticated, user, login, logout]
   );
 
   return <CrmAuthContext.Provider value={value}>{children}</CrmAuthContext.Provider>;

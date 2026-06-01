@@ -17,23 +17,18 @@ import {
 } from 'lucide-react';
 import type { EventData } from '../data/events';
 import {
-  deleteCrmEvent,
-  getCrmEvents,
-  isCrmEventId,
-  newCrmEventId,
-  upsertCrmEvent,
-} from '../data/event-store';
+  adminCreateEvent,
+  adminDeleteEvent,
+  adminFetchEvent,
+  adminUpdateEvent,
+} from '../api/admin';
+import { newCrmEventId, toDateInputValue } from '../api/mappers';
+import { ApiError } from '../api/client';
 import { CRM_CATEGORIES, DEFAULT_MAP_EMBED } from './crm-constants';
+import { getLastListPath, type CrmBackState } from './crm-nav';
 import { FilterPill } from './FilterPill';
 import { EventCardPreview } from './EventCardPreview';
 import { EventDetailPreview } from './EventDetailPreview';
-
-function toDateInputValue(d: Date) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
 
 function fromDateInput(s: string): Date | null {
   if (!s) return null;
@@ -84,8 +79,10 @@ export function CrmEventForm() {
   const { id } = useParams<{ id: string }>();
   const routerLocation = useLocation();
   const navigate = useNavigate();
-  const isEditRoute = routerLocation.pathname.includes('/admin/crm/uredi/');
-  const isEdit = Boolean(isEditRoute && id && isCrmEventId(id));
+  const isEditRoute = routerLocation.pathname.includes('/uredi/');
+  const isEdit = Boolean(isEditRoute && id);
+  const backState = routerLocation.state as CrmBackState | null;
+  const backPath = backState?.from ?? getLastListPath();
 
   const [title, setTitle] = useState('');
   const [dateStr, setDateStr] = useState(toDateInputValue(new Date()));
@@ -102,54 +99,68 @@ export function CrmEventForm() {
   const [isImportant, setIsImportant] = useState(false);
   const [attachName, setAttachName] = useState('');
   const [attachUrl, setAttachUrl] = useState('');
+  const [published, setPublished] = useState(true);
+  const [slug, setSlug] = useState('');
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [previewTab, setPreviewTab] = useState<'card' | 'detail'>('card');
 
   useEffect(() => {
     setNotFound(false);
-    if (isEditRoute && id && !isCrmEventId(id)) {
-      setNotFound(true);
-      return;
-    }
+    setLoadError(null);
     if (!isEdit || !id) return;
-    const existing = getCrmEvents().find((e) => e.id === id);
-    if (!existing) {
-      setNotFound(true);
-      return;
-    }
-    setTitle(existing.title);
-    setDateStr(toDateInputValue(existing.date));
-    setDateEndStr(existing.dateEnd ? toDateInputValue(existing.dateEnd) : '');
-    setTime(existing.time);
-    setTimeEnd(existing.timeEnd ?? '');
-    setDescription(existing.description);
-    setLongDescription(existing.longDescription);
-    setCategory(existing.category);
-    setSecondaryFilter(existing.secondaryFilter ?? '');
-    setLocation(existing.location);
-    setLocationMapUrl(existing.locationMapUrl ?? '');
-    setImageUrl(existing.imageUrl ?? '');
-    setIsImportant(Boolean(existing.isImportant));
-    const a = existing.attachments?.[0];
-    setAttachName(a?.name ?? '');
-    setAttachUrl(a?.url ?? '');
-  }, [isEdit, id, isEditRoute]);
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const existing = await adminFetchEvent(id);
+        if (cancelled) return;
+        setTitle(existing.title);
+        setDateStr(toDateInputValue(existing.date));
+        setDateEndStr(existing.dateEnd ? toDateInputValue(existing.dateEnd) : '');
+        setTime(existing.time);
+        setTimeEnd(existing.timeEnd ?? '');
+        setDescription(existing.description);
+        setLongDescription(existing.longDescription);
+        setCategory(existing.category);
+        setSecondaryFilter(existing.secondaryFilter ?? '');
+        setLocation(existing.location);
+        setLocationMapUrl(existing.locationMapUrl ?? '');
+        setImageUrl(existing.imageUrl ?? '');
+        setIsImportant(Boolean(existing.isImportant));
+        setPublished(existing.published !== false);
+        setSlug(existing.slug ?? '');
+        const a = existing.attachments?.[0];
+        setAttachName(a?.name ?? '');
+        setAttachUrl(a?.url ?? '');
+      } catch (e) {
+        if (cancelled) return;
+        setNotFound(true);
+        setLoadError(
+          e instanceof ApiError ? e.message : 'Dogodek ni bil najden.'
+        );
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isEdit, id]);
 
   const previewDate = useMemo(() => fromDateInput(dateStr), [dateStr]);
   const previewDateEnd = useMemo(() => fromDateInput(dateEndStr), [dateEndStr]);
   const hasAttachment = Boolean(attachName.trim() && attachUrl.trim());
 
-  const onSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    const eventId = isEdit && id ? id : newCrmEventId();
+  const buildPayload = (eventId: string): EventData => {
     const date = fromDateInput(dateStr) ?? new Date();
     const dateEnd = fromDateInput(dateEndStr) ?? undefined;
-
     const attachments = hasAttachment
       ? [{ name: attachName.trim(), url: attachUrl.trim() }]
       : undefined;
 
-    const payload: EventData = {
+    return {
       id: eventId,
       title: title.trim(),
       date,
@@ -159,50 +170,83 @@ export function CrmEventForm() {
       description: description.trim(),
       longDescription: longDescription.trim() || description.trim(),
       category,
-      secondaryFilter: isImportant && secondaryFilter.trim() ? secondaryFilter.trim() : undefined,
+      secondaryFilter:
+        isImportant && secondaryFilter.trim() ? secondaryFilter.trim() : undefined,
       location: location.trim(),
       locationMapUrl: locationMapUrl.trim() || DEFAULT_MAP_EMBED,
       isImportant,
       imageUrl: imageUrl.trim() || undefined,
       attachments,
+      published,
+      slug: slug.trim() || undefined,
     };
-
-    upsertCrmEvent(payload);
-    navigate(`/admin/crm/dogodek/${eventId}`, { replace: true });
   };
 
-  const onDelete = () => {
+  const onSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setSaveError(null);
+    setSaving(true);
+    try {
+      const eventId = isEdit && id ? id : newCrmEventId();
+      const payload = buildPayload(eventId);
+      const saved = isEdit
+        ? await adminUpdateEvent(payload)
+        : await adminCreateEvent(payload);
+      navigate(`/admin/dashboard/dogodek/${saved.id}`, {
+        replace: true,
+        state: { from: backPath },
+      });
+    } catch (err) {
+      setSaveError(
+        err instanceof ApiError
+          ? err.message
+          : 'Shranjevanje ni uspelo. Preveri admin API na strežniku.'
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const onDelete = async () => {
     if (!isEdit || !id || !confirm('Res želiš izbrisati ta dogodek?')) return;
-    deleteCrmEvent(id);
-    navigate('/admin/crm');
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await adminDeleteEvent(id);
+      navigate(backPath);
+    } catch (err) {
+      setSaveError(
+        err instanceof ApiError ? err.message : 'Brisanje ni uspelo.'
+      );
+      setSaving(false);
+    }
   };
 
   if (notFound) {
     return (
       <div className="rounded-2xl bg-white border border-[#18201B]/10 p-10 text-center">
-        <p className="text-[#18201B] mb-4">Dogodek ni bil najden.</p>
-        <Link to="/admin/crm" className="text-[#2F5D46] hover:underline">
-          Nazaj na seznam
+        <p className="text-[#18201B] mb-4">{loadError ?? 'Dogodek ni bil najden.'}</p>
+        <Link to={backPath} className="crm-back-link">
+          ← Nazaj
         </Link>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-        <div>
-          <Link to="/admin/crm" className="text-sm text-[#2F5D46] hover:underline">
-            ← Seznam
+    <div className="crm-page">
+      <header className="crm-page__header">
+        {isEdit && (
+          <Link to={backPath} state={backState ?? undefined} className="crm-back-link">
+            ← Nazaj
           </Link>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-[#18201B] mt-1 tracking-tight">
-            {isEdit ? 'Uredi dogodek' : 'Nov dogodek'}
-          </h1>
-          <p className="text-sm text-[#18201B]/60 mt-1">
-            Levo izpolni obrazec, desno v živo vidiš, kako bo izgledala kartica na strani.
-          </p>
-        </div>
-      </div>
+        )}
+        <p className="crm-page__eyebrow">CRM</p>
+        <h1 className="crm-page__title">{isEdit ? 'Uredi dogodek' : 'Ustvari dogodek'}</h1>
+        <p className="crm-page__subtitle">
+          Levo izpolni obrazec, desno v živo vidiš, kako bo izgledala kartica na strani.
+        </p>
+      </header>
 
       <form
         onSubmit={onSubmit}
@@ -223,6 +267,28 @@ export function CrmEventForm() {
                 placeholder="npr. Poletni koncert ob Savinji"
                 className={inputCls}
               />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4 pt-2">
+              <div>
+                <FieldLabel hint="opcijsko">Slug (URL)</FieldLabel>
+                <input
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  placeholder="poletni-koncert-nazarje"
+                  className={inputCls}
+                />
+              </div>
+              <div className="flex items-end">
+                <label className="flex items-center gap-2 cursor-pointer pb-2.5">
+                  <input
+                    type="checkbox"
+                    checked={published}
+                    onChange={(e) => setPublished(e.target.checked)}
+                    className="size-4 rounded border-[#18201B]/20"
+                  />
+                  <span className="text-sm text-[#18201B]">Objavljeno na javni strani</span>
+                </label>
+              </div>
             </div>
           </Section>
 
@@ -471,16 +537,23 @@ export function CrmEventForm() {
             </div>
           </Section>
 
+          {saveError && (
+            <p className="text-sm text-red-700 rounded-lg bg-red-50 border border-red-100 px-4 py-3">
+              {saveError}
+            </p>
+          )}
+
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#2F5D46] px-5 py-3 text-white text-sm font-medium shadow-sm hover:bg-[#1E3A2F] transition-colors"
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-xl bg-[#2F5D46] px-5 py-3 text-white text-sm font-medium shadow-sm hover:bg-[#1E3A2F] transition-colors disabled:opacity-60"
             >
               <Save className="size-4" />
-              {isEdit ? 'Shrani spremembe' : 'Shrani dogodek'}
+              {saving ? 'Shranjujem…' : isEdit ? 'Shrani spremembe' : 'Shrani dogodek'}
             </button>
             <Link
-              to="/admin/crm"
+              to={backPath}
               className="inline-flex items-center gap-2 rounded-xl border border-[#18201B]/15 bg-white px-5 py-3 text-sm text-[#18201B] hover:bg-[#F7F4EE] transition-colors"
             >
               <X className="size-4" />
@@ -489,8 +562,9 @@ export function CrmEventForm() {
             {isEdit && (
               <button
                 type="button"
+                disabled={saving}
                 onClick={onDelete}
-                className="ml-auto inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm text-red-800 hover:bg-red-100 transition-colors"
+                className="ml-auto inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-5 py-3 text-sm text-red-800 hover:bg-red-100 transition-colors disabled:opacity-60"
               >
                 <Trash2 className="size-4" />
                 Izbriši

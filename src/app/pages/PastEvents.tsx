@@ -2,7 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router';
 import { Clock } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useMergedEvents } from '../data/event-store';
+import { usePublishedEvents } from '../hooks/use-published-events';
+import { EventsError, EventsLoading } from '../components/public/events/events-loading';
 import { EventCard } from '../components/public/events/event-card';
 import { EventFilterBar, EventSortOptionItem } from '../components/public/events/event-filter-bar';
 import { EventResultsGrid } from '../components/public/events/event-results-grid';
@@ -18,7 +19,7 @@ const sortOptions: EventSortOptionItem[] = [
 
 export function PastEvents() {
   const navigate = useNavigate();
-  const mergedEvents = useMergedEvents();
+  const { events: mergedEvents, loading, error, refetch } = usePublishedEvents();
   const {
     search,
     setSearch,
@@ -60,6 +61,14 @@ export function PastEvents() {
         </div>
       </motion.div>
 
+      {loading ? (
+        <EventsLoading />
+      ) : error ? (
+        <div className="px-6 py-8">
+          <EventsError message={error} onRetry={refetch} />
+        </div>
+      ) : (
+        <>
       <EventFilterBar
         search={search}
         onSearchChange={setSearch}
@@ -89,6 +98,8 @@ export function PastEvents() {
           />
         )}
       />
+        </>
+      )}
 
       <Footer />
     </div>

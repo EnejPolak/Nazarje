@@ -3,6 +3,7 @@
 :root {
   --font-size: 16px;
   --font-family-base: 'Archivo Black', sans-serif;
+  --font-family-button: 'Inter', sans-serif;
   --background: #F7F4EE;
   --foreground: #18201B;
   --card: #ffffff;
@@ -40,6 +41,9 @@
   --sidebar-accent-foreground: #18201B;
   --sidebar-border: rgba(30, 58, 47, 0.1);
   --sidebar-ring: #3D6F7A;
+  --page-content-max-width: 80rem;
+  --page-content-padding: 1.5rem;
+  --calendar-inner-padding: 1.25rem;
 }
 
 .dark {
@@ -170,9 +174,14 @@
   }
 
   button {
+    font-family: var(--font-family-button);
     font-size: var(--text-base);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
+  }
+
+  [data-slot="button"] {
+    font-family: var(--font-family-button);
   }
 
   input {
@@ -181,7 +190,6 @@
     line-height: 1.5;
   }
 
-  button,
   input,
   textarea,
   select {

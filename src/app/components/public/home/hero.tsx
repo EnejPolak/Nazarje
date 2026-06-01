@@ -7,8 +7,10 @@ export function Hero() {
       <div className="public-hero__frame">
         <div className="public-hero__content">
           <h1 className="public-hero__title">
-            <span>DOGOTKI</span>
-            <span className="public-hero__title-line--offset">NAZARJE</span>
+            <span className="public-hero__title-row">
+              <span>DOGODKI</span>
+              <span>NAZARJE</span>
+            </span>
           </h1>
         </div>
       </div>

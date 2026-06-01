@@ -4,3 +4,11 @@
   margin-top: clamp(-5rem, -7vw, -2.5rem);
   padding-bottom: 4rem;
 }
+
+.home-calendar-section__container {
+  width: 100%;
+  max-width: var(--page-content-max-width);
+  margin: 0 auto;
+  padding-inline: var(--page-content-padding);
+  box-sizing: border-box;
+}

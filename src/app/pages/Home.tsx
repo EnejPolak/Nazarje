@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Header } from '../components/public/layout/header';
 import { Hero } from '../components/public/home/hero';
 import { EventCalendar, CalendarEvent } from '../components/public/events/event-calendar';
 import { EventCard } from '../components/public/events/event-card';
+import { EventsError, EventsLoading } from '../components/public/events/events-loading';
 import { Footer } from '../components/public/layout/footer';
-import { useMergedEvents } from '../data/event-store';
+import { usePublishedEvents } from '../hooks/use-published-events';
+import { useNewsletterForm } from '../hooks/use-newsletter-form';
 import '../styles/components/home.css';
 
 const fadeUpInView = (delay = 0) => ({
@@ -18,30 +20,20 @@ const fadeUpInView = (delay = 0) => ({
 
 export function Home() {
   const navigate = useNavigate();
-  const mergedEvents = useMergedEvents();
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
+  const { events, loading, error, refetch } = usePublishedEvents();
+  const newsletter = useNewsletterForm('home');
 
   const upcomingEvents = useMemo(() => {
     const t = new Date();
     t.setHours(0, 0, 0, 0);
-    return mergedEvents.filter((e) => {
+    return events.filter((e) => {
       const d = new Date(e.date);
       d.setHours(0, 0, 0, 0);
       return d >= t;
     });
-  }, [mergedEvents]);
+  }, [events]);
 
-  const handleSubscribe = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setSubscribed(true);
-      setEmail('');
-      setTimeout(() => setSubscribed(false), 4000);
-    }
-  };
-
-  const calendarEvents: CalendarEvent[] = mergedEvents.map((event) => ({
+  const calendarEvents: CalendarEvent[] = events.map((event) => ({
     id: event.id,
     title: event.title,
     date: event.date,
@@ -56,17 +48,21 @@ export function Home() {
 
       <Hero />
 
-      {/* Calendar Section */}
       <section id="koledar" className="home-calendar-section">
-        <div className="max-w-7xl mx-auto px-6">
-          <EventCalendar
-            events={calendarEvents}
-            onEventClick={(id) => navigate(`/event/${id}`)}
-          />
+        <div className="home-calendar-section__container">
+          {loading ? (
+            <EventsLoading label="Nalagam koledar…" />
+          ) : error ? (
+            <EventsError message={error} onRetry={refetch} />
+          ) : (
+            <EventCalendar
+              events={calendarEvents}
+              onEventClick={(id) => navigate(`/event/${id}`)}
+            />
+          )}
         </div>
       </section>
 
-      {/* Events Grid Section */}
       <section id="dogodki" className="py-16 bg-[#EAF1EA]">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div {...fadeUpInView(0)} className="text-center mb-12">
@@ -74,16 +70,22 @@ export function Home() {
             <p className="text-[#18201B]/70 max-w-2xl mx-auto">Kliknite na kartico za vse podrobnosti</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {upcomingEvents.slice(0, 6).map((event, i) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                index={i}
-                onClick={() => navigate(`/event/${event.id}`)}
-              />
-            ))}
-          </div>
+          {loading ? (
+            <EventsLoading />
+          ) : error ? (
+            <EventsError message={error} onRetry={refetch} />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingEvents.slice(0, 6).map((event, i) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  index={i}
+                  onClick={() => navigate(`/event/${event.id}`)}
+                />
+              ))}
+            </div>
+          )}
 
           <motion.div
             {...fadeUpInView(0.1)}
@@ -115,14 +117,12 @@ export function Home() {
         </div>
       </section>
 
-      {/* Newsletter CTA */}
       <section className="py-14 bg-[#F7F4EE]">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             {...fadeUpInView(0)}
             className="flex flex-col md:flex-row md:items-center gap-8 md:gap-16 px-8 py-10 rounded-2xl bg-[#1E3A2F]"
           >
-            {/* Left */}
             <div className="flex-1 min-w-0">
               <span className="inline-block text-[11px] uppercase tracking-widest text-white/40 mb-3">
                 E-novice
@@ -135,9 +135,8 @@ export function Home() {
               </p>
             </div>
 
-            {/* Right: form */}
             <div className="flex-shrink-0 w-full md:w-auto">
-              {subscribed ? (
+              {newsletter.subscribed ? (
                 <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -147,21 +146,28 @@ export function Home() {
                   Hvala! Prijavljeni ste.
                 </motion.div>
               ) : (
-                <form onSubmit={handleSubscribe} className="flex gap-2">
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="vaš@email.si"
-                    className="w-56 md:w-64 px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/35 text-sm border border-white/15 focus:outline-none focus:border-white/40 transition-colors"
-                  />
-                  <button
-                    type="submit"
-                    className="px-5 py-3 rounded-xl bg-white hover:bg-white/90 text-[#1E3A2F] text-sm transition-colors whitespace-nowrap"
-                  >
-                    Prijavi se
-                  </button>
+                <form onSubmit={newsletter.handleSubmit} className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      required
+                      value={newsletter.email}
+                      onChange={(e) => newsletter.setEmail(e.target.value)}
+                      placeholder="vaš@email.si"
+                      disabled={newsletter.submitting}
+                      className="w-56 md:w-64 px-4 py-3 rounded-xl bg-white/10 text-white placeholder-white/35 text-sm border border-white/15 focus:outline-none focus:border-white/40 transition-colors disabled:opacity-60"
+                    />
+                    <button
+                      type="submit"
+                      disabled={newsletter.submitting}
+                      className="px-5 py-3 rounded-xl bg-white hover:bg-white/90 text-[#1E3A2F] text-sm transition-colors whitespace-nowrap disabled:opacity-60"
+                    >
+                      {newsletter.submitting ? '…' : 'Prijavi se'}
+                    </button>
+                  </div>
+                  {newsletter.error && (
+                    <p className="text-[11px] text-red-200">{newsletter.error}</p>
+                  )}
                 </form>
               )}
               <p className="text-[11px] text-white/25 mt-2.5 pl-1">

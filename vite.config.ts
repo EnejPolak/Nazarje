@@ -24,6 +24,16 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://api.nazarje.si',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (p) => p.replace(/^\/api/, ''),
+      },
+    },
+  },
   resolve: {
     alias: {
       // Alias @ to the src directory

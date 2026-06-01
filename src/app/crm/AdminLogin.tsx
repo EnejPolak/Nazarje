@@ -1,17 +1,48 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
+import nazarjeGrb from 'figma:asset/2e8f7a543b609ec574e73e03452550de1d5e4577.png';
 import { useCrmAuth } from './auth-context';
+import '../styles/components/admin-login.css';
+
+type FieldErrors = {
+  email?: string;
+  password?: string;
+};
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateFields(email: string, password: string): FieldErrors {
+  const errors: FieldErrors = {};
+  const trimmedEmail = email.trim();
+
+  if (!trimmedEmail) {
+    errors.email = 'E-poštni naslov je obvezen.';
+  } else if (!EMAIL_PATTERN.test(trimmedEmail)) {
+    errors.email = 'Vnesite veljaven e-poštni naslov.';
+  }
+
+  if (!password) {
+    errors.password = 'Geslo je obvezno.';
+  }
+
+  return errors;
+}
 
 export function AdminLogin() {
   const { isAuthenticated, login } = useCrmAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/admin/crm', { replace: true });
+      navigate('/admin/dashboard', { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -19,65 +50,138 @@ export function AdminLogin() {
     return null;
   }
 
-  const onSubmit = (e: FormEvent) => {
+  const showEmailError = Boolean(fieldErrors.email && (submitAttempted || email.length > 0));
+  const showPasswordError = Boolean(
+    fieldErrors.password && (submitAttempted || password.length > 0)
+  );
+
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError(false);
-    if (login(email, password)) {
-      navigate('/admin/crm', { replace: true });
+    setSubmitAttempted(true);
+    setFormError(null);
+
+    const errors = validateFields(email, password);
+    setFieldErrors(errors);
+    if (errors.email || errors.password) {
+      return;
+    }
+
+    setSubmitting(true);
+    const result = await login(email.trim(), password);
+    setSubmitting(false);
+
+    if (result.ok) {
+      navigate('/admin/dashboard', { replace: true });
     } else {
-      setError(true);
+      setFormError(result.error ?? 'Napačen e-poštni naslov ali geslo.');
+    }
+  };
+
+  const onEmailChange = (value: string) => {
+    setEmail(value);
+    setFormError(null);
+    if (fieldErrors.email) {
+      setFieldErrors((prev) => ({ ...prev, email: undefined }));
+    }
+  };
+
+  const onPasswordChange = (value: string) => {
+    setPassword(value);
+    setFormError(null);
+    if (fieldErrors.password) {
+      setFieldErrors((prev) => ({ ...prev, password: undefined }));
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F4EE] flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md rounded-2xl border border-[#18201B]/10 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl text-[#18201B] font-semibold mb-6">Prijava</h1>
+    <div className="admin-login">
+      <div className="admin-login__card">
+        <header className="admin-login__brand">
+          <img src={nazarjeGrb} alt="Grb občine Nazarje" className="admin-login__grb" />
+          <p className="admin-login__title">Prijava</p>
+          <p className="admin-login__subtitle">Upravljanje dogodkov</p>
+        </header>
 
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="crm-email" className="block text-sm font-medium text-[#18201B] mb-1.5">
-              E-pošta
+        <form onSubmit={onSubmit} className="admin-login__form" noValidate>
+          <div className="admin-login__field">
+            <label htmlFor="crm-email" className="admin-login__label">
+              E-pošta <span className="admin-login__label-required">*</span>
             </label>
             <input
               id="crm-email"
-              type="text"
+              name="email"
+              type="email"
               inputMode="email"
               autoComplete="username"
+              required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-[#18201B]/20 bg-[#F7F4EE]/50 px-3 py-2.5 text-[#18201B] outline-none focus:ring-2 focus:ring-[#2F5D46]/40"
+              onChange={(e) => onEmailChange(e.target.value)}
+              className={`admin-login__input${showEmailError ? ' admin-login__input--error' : ''}`}
               placeholder="vas@email.si"
+              aria-invalid={showEmailError}
+              aria-describedby={showEmailError ? 'crm-email-error' : undefined}
             />
+            {showEmailError && fieldErrors.email && (
+              <p id="crm-email-error" className="admin-login__field-error" role="alert">
+                {fieldErrors.email}
+              </p>
+            )}
           </div>
-          <div>
-            <label htmlFor="crm-password" className="block text-sm font-medium text-[#18201B] mb-1.5">
-              Geslo
+
+          <div className="admin-login__field">
+            <label htmlFor="crm-password" className="admin-login__label">
+              Geslo <span className="admin-login__label-required">*</span>
             </label>
-            <input
-              id="crm-password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-[#18201B]/20 bg-[#F7F4EE]/50 px-3 py-2.5 text-[#18201B] outline-none focus:ring-2 focus:ring-[#2F5D46]/40"
-              placeholder="Vnesi geslo"
-            />
+            <div className="admin-login__password-wrap">
+              <input
+                id="crm-password"
+                name="password"
+                type={passwordVisible ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => onPasswordChange(e.target.value)}
+                className={`admin-login__input admin-login__input--password${showPasswordError ? ' admin-login__input--error' : ''}`}
+                placeholder="Vnesite geslo"
+                aria-invalid={showPasswordError}
+                aria-describedby={showPasswordError ? 'crm-password-error' : undefined}
+              />
+              <button
+                type="button"
+                className="admin-login__password-toggle"
+                onClick={() => setPasswordVisible((v) => !v)}
+                aria-label={passwordVisible ? 'Skrij geslo' : 'Prikaži geslo'}
+                aria-pressed={passwordVisible}
+              >
+                {passwordVisible ? (
+                  <EyeOff className="admin-login__password-toggle-icon" aria-hidden />
+                ) : (
+                  <Eye className="admin-login__password-toggle-icon" aria-hidden />
+                )}
+              </button>
+            </div>
+            {showPasswordError && fieldErrors.password && (
+              <p id="crm-password-error" className="admin-login__field-error" role="alert">
+                {fieldErrors.password}
+              </p>
+            )}
           </div>
-          {error && <p className="text-sm text-red-700">Napačen e-naslov ali geslo.</p>}
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-[#2F5D46] py-2.5 text-white font-medium hover:bg-[#1E3A2F] transition-colors"
-          >
-            Prijava
+
+          {formError && (
+            <div className="admin-login__alert" role="alert" aria-live="polite">
+              <AlertCircle className="admin-login__alert-icon" aria-hidden />
+              <p className="admin-login__alert-text">{formError}</p>
+            </div>
+          )}
+
+          <button type="submit" disabled={submitting} className="admin-login__submit">
+            {submitting ? 'Prijava…' : 'Prijava'}
           </button>
         </form>
-        <p className="mt-4 text-xs text-[#18201B]/50">
-          Za test: <span className="font-mono">test@test</span> / <span className="font-mono">test12345</span>
-        </p>
       </div>
-      <a href="/" className="mt-8 text-sm text-[#2F5D46] hover:underline">
-        ← Nazaj na stran občine
+
+      <a href="/" className="admin-login__back">
+        ← Nazaj na domačo stran
       </a>
     </div>
   );
