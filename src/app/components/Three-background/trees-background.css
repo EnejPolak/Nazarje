@@ -14,21 +14,15 @@
 }
 
 #trees {
-  position: relative;
-  background: #fff;
-  overflow: hidden;
-  height: 25vh;
-  width: 100%;
-  margin-top: 70vh;
-}
-
-#floor {
-  background: #3a471f;
   position: absolute;
-  bottom: 0;
-  height: 0;
-  width: 100%;
   left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: clamp(180px, 25vh, 320px);
+  margin-top: 0;
+  background: transparent;
+  overflow: hidden;
 }
 
 .tree {

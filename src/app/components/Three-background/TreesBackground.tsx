@@ -20,7 +20,6 @@ export function TreesBackground() {
     <div className="trees-background-layer" aria-hidden>
       <div id="trees-container">
         <div id="trees" />
-        <section id="floor" />
       </div>
     </div>
   );

@@ -31,11 +31,9 @@ export function spawnTrees() {
 export function killTrees() {
   gsap.killTweensOf('#trees');
   gsap.killTweensOf('#trees-container');
-  gsap.killTweensOf('#floor');
   gsap.killTweensOf('.tree');
   gsap.killTweensOf('.tree path');
   $('#trees').empty();
-  gsap.set('#floor', { height: 0 });
   gsap.set('#trees', { autoAlpha: 1, clearProps: 'autoAlpha' });
 }
 
@@ -44,10 +42,8 @@ function animateTrees() {
     const branches = $('path:not(.trunk)', tree);
     const leftBranches = $('path.left', tree);
     const rightBranches = $('path.right', tree);
-    const floor = $('#floor');
     const tl = gsap.timeline({ delay: i * 0.25 });
 
-    gsap.to(floor, { duration: 0.3, height: 53 });
     gsap.set(leftBranches, { rotation: -20, transformOrigin: 'top right' });
     gsap.set(rightBranches, { rotation: 20 });
 

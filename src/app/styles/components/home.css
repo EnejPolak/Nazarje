@@ -24,4 +24,6 @@
 .home-below-hero__content {
   position: relative;
   z-index: 1;
+  /* prostor za drevesa na dnu (ozadje je absolute, ne 70vh) */
+  padding-bottom: clamp(10rem, 22vh, 14rem);
 }

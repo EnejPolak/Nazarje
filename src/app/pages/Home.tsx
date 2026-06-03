@@ -9,7 +9,7 @@ import { EventsError, EventsLoading } from '../components/public/events/events-l
 import { Footer } from '../components/public/layout/footer';
 import { TreesBackground } from '../components/Three-background';
 import { usePublishedEvents } from '../hooks/use-published-events';
-import { useNewsletterForm } from '../hooks/use-newsletter-form';
+// import { useNewsletterForm } from '../hooks/use-newsletter-form';
 import '../styles/components/home.css';
 
 const fadeUpInView = (delay = 0) => ({
@@ -22,7 +22,7 @@ const fadeUpInView = (delay = 0) => ({
 export function Home() {
   const navigate = useNavigate();
   const { events, loading, error, refetch } = usePublishedEvents();
-  const newsletter = useNewsletterForm('home');
+  // const newsletter = useNewsletterForm('home');
 
   const upcomingEvents = useMemo(() => {
     const t = new Date();
@@ -122,6 +122,7 @@ export function Home() {
         </div>
       </section>
 
+      {/* E-novice — začasno skrito na domači strani
       <section className="py-14 bg-transparent">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
@@ -182,6 +183,7 @@ export function Home() {
           </motion.div>
         </div>
       </section>
+      */}
         </div>
       </div>
 
