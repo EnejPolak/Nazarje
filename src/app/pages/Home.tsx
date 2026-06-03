@@ -7,6 +7,7 @@ import { EventCalendar, CalendarEvent } from '../components/public/events/event-
 import { EventCard } from '../components/public/events/event-card';
 import { EventsError, EventsLoading } from '../components/public/events/events-loading';
 import { Footer } from '../components/public/layout/footer';
+import { TreesBackground } from '../components/Three-background';
 import { usePublishedEvents } from '../hooks/use-published-events';
 import { useNewsletterForm } from '../hooks/use-newsletter-form';
 import '../styles/components/home.css';
@@ -63,7 +64,11 @@ export function Home() {
         </div>
       </section>
 
-      <section id="dogodki" className="py-16 bg-[#EAF1EA]">
+      <div className="home-below-hero">
+        <TreesBackground />
+
+        <div className="home-below-hero__content">
+      <section id="dogodki" className="py-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div {...fadeUpInView(0)} className="text-center mb-12">
             <h2 className="text-3xl text-[#18201B] mb-4">Prihajajoči dogodki</h2>
@@ -117,7 +122,7 @@ export function Home() {
         </div>
       </section>
 
-      <section className="py-14 bg-[#F7F4EE]">
+      <section className="py-14 bg-transparent">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             {...fadeUpInView(0)}
@@ -177,6 +182,8 @@ export function Home() {
           </motion.div>
         </div>
       </section>
+        </div>
+      </div>
 
       <Footer />
     </div>

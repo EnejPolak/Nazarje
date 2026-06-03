@@ -52,7 +52,7 @@ export function EventCard({
       viewport={{ once: true, margin: '-40px' }}
       transition={{ duration: 0.45, delay: (index % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="event-card event-card-ticket group"
+      className="event-card group"
       onClick={onClick}
     >
       {event.imageUrl && (

@@ -59,6 +59,12 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
     currentDate.getMonth() === today.getMonth() &&
     currentDate.getFullYear() === today.getFullYear();
 
+  const dayNumberColor = (isWeekend: boolean, isTodayDate: boolean, isSelected: boolean) => {
+    if (isSelected) return 'text-white';
+    if (isTodayDate) return 'text-[#2F5D46]';
+    return isWeekend ? 'text-[#9ca39f]' : 'text-[#5a5f5c]';
+  };
+
   const selectedDate = selectedDay
     ? new Date(currentDate.getFullYear(), currentDate.getMonth(), selectedDay)
     : null;
@@ -92,31 +98,37 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
               Kliknite na dan za podrobnosti
             </p>
           </div>
-          <div className="flex items-center gap-1">
+          <nav
+            className="flex items-center gap-0 shrink-0"
+            aria-label="Navigacija po mesecih"
+          >
             <button
+              type="button"
               onClick={previousMonth}
-              className="w-7 h-7 flex items-center justify-center hover:bg-[#EAF1EA] transition-colors"
+              className="flex size-9 items-center justify-center rounded-full text-[#18201B] transition-colors hover:text-[#2F5D46] hover:bg-[#F7F4EE]"
               aria-label="Prejšnji mesec"
             >
-              <ChevronLeft className="w-4 h-4 text-[#1E3A2F]" />
+              <ChevronLeft className="size-5" strokeWidth={2.25} />
             </button>
             <button
+              type="button"
               onClick={() => {
                 setCurrentDate(new Date());
                 setSelectedDay(new Date().getDate());
               }}
-              className="px-2.5 h-7 text-xs text-[#2F5D46] bg-[#EAF1EA] hover:bg-[#d4e8d4] transition-colors"
+              className="min-w-[4.5rem] px-2 py-1.5 text-sm font-bold tracking-tight text-[#18201B] transition-colors hover:text-[#2F5D46]"
             >
               Danes
             </button>
             <button
+              type="button"
               onClick={nextMonth}
-              className="w-7 h-7 flex items-center justify-center hover:bg-[#EAF1EA] transition-colors"
+              className="flex size-9 items-center justify-center rounded-full text-[#18201B] transition-colors hover:text-[#2F5D46] hover:bg-[#F7F4EE]"
               aria-label="Naslednji mesec"
             >
-              <ChevronRight className="w-4 h-4 text-[#1E3A2F]" />
+              <ChevronRight className="size-5" strokeWidth={2.25} />
             </button>
-          </div>
+          </nav>
         </div>
 
         {/* Legend */}
@@ -143,8 +155,8 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
           {dayNames.map((day, i) => (
             <div
               key={day}
-              className={`text-center text-[11px] py-1 uppercase tracking-widest ${
-                i >= 5 ? 'text-[#9B3A32]/50' : 'text-[#3D6F7A]/60'
+              className={`text-center text-[11px] py-1 uppercase tracking-widest font-medium ${
+                i >= 5 ? 'text-[#5a5f5c]' : 'text-[#18201B]'
               }`}
             >
               {day}
@@ -175,7 +187,7 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
               <button
                 key={day}
                 onClick={() => setSelectedDay(isSelected ? null : day)}
-                className={`relative h-16 flex flex-col items-center justify-start pt-1.5 px-1 transition-all cursor-pointer
+                className={`relative h-16 flex items-center justify-center px-1 transition-all cursor-pointer
                   ${isSelected
                     ? hasEvents ? '' : 'bg-[#1E3A2F]'
                     : isTodayDate
@@ -190,35 +202,38 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
                     : undefined
                 }
               >
-                <span
-                  className={`text-sm leading-none transition-colors mb-0.5 font-semibold
-                    ${isSelected
-                      ? 'text-white'
-                      : isTodayDate
-                      ? 'text-[#2F5D46]'
-                      : isWeekend
-                      ? 'text-[#9B3A32]/60'
-                      : 'text-[#18201B]/80'}
-                  `}
-                >
-                  {day}
-                </span>
-
-                {/* Event title under the day number */}
-                {hasEvents && (
-                  <p
-                    className="text-[9px] leading-tight text-center line-clamp-2 w-full px-0.5"
-                    style={{ color: isSelected ? 'rgba(255,255,255,0.9)' : eventColor }}
+                {hasEvents ? (
+                  <div className="flex flex-col items-center justify-center gap-1 text-center w-full max-w-full px-1 pointer-events-none">
+                    <span
+                      className={`text-sm leading-none font-semibold ${dayNumberColor(isWeekend, isTodayDate, isSelected)}`}
+                    >
+                      {day}
+                    </span>
+                    <p
+                      className={`text-[10px] leading-snug line-clamp-2 w-full font-bold tracking-tight ${
+                        isSelected ? 'text-white' : 'text-[#18201B]'
+                      }`}
+                      style={
+                        isSelected
+                          ? { textShadow: '0 1px 2px rgba(0,0,0,0.2)' }
+                          : undefined
+                      }
+                    >
+                      {firstEvent.title}
+                    </p>
+                  </div>
+                ) : (
+                  <span
+                    className={`text-sm leading-none font-semibold ${dayNumberColor(isWeekend, isTodayDate, isSelected)}`}
                   >
-                    {firstEvent.title}
-                  </p>
+                    {day}
+                  </span>
                 )}
 
-                {/* Multiple events indicator */}
                 {dayEvents.length > 1 && (
                   <div
-                    className="absolute bottom-1 right-1 text-[8px] px-1 py-0.5 text-white"
-                    style={{ backgroundColor: isSelected ? 'rgba(0,0,0,0.2)' : eventColor }}
+                    className="absolute top-0.5 right-0.5 text-[8px] px-1 py-0.5 leading-none text-white pointer-events-none"
+                    style={{ backgroundColor: isSelected ? 'rgba(0,0,0,0.25)' : eventColor }}
                   >
                     +{dayEvents.length - 1}
                   </div>
@@ -234,12 +249,11 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
       <div className="lg:hidden h-px bg-[#1E3A2F]/8 mx-5" />
 
       {/* Right: Event Panel */}
-      <div className="w-full lg:w-64 xl:w-72 p-5 lg:p-6 flex flex-col">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm text-[#18201B]/60 uppercase tracking-widest">{panelTitle}</h3>
-          {selectedEvents.length === 0 && (
-            <span className="text-[11px] text-[#18201B]/40">{monthEvents.length} skupaj</span>
-          )}
+      <div className="w-full lg:w-72 xl:w-80 p-5 lg:p-6 flex flex-col shrink-0">
+        <div className="mb-4 min-w-0">
+          <h3 className="text-base font-semibold text-[#18201B]/60 uppercase tracking-wide whitespace-nowrap">
+            {panelTitle}
+          </h3>
         </div>
 
         {displayEvents.length === 0 ? (

@@ -1,0 +1,1 @@
+export { TreesBackground } from './TreesBackground';
