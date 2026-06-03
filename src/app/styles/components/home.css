@@ -1,3 +1,21 @@
+.home-after-hero {
+  position: relative;
+}
+
+.home-leaves-zone {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.home-after-hero .home-calendar-section,
+.home-after-hero .home-below-hero {
+  position: relative;
+  z-index: 1;
+}
+
 .home-calendar-section {
   position: relative;
   z-index: 10;

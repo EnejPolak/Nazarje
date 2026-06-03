@@ -1,0 +1,229 @@
+.falling-leaves-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.falling-leaves-layer #leaves {
+  position: relative;
+  top: -40px;
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+}
+
+.falling-leaves-layer #leaves .leaf {
+  display: block;
+  position: absolute;
+  top: 0;
+  width: 200px;
+  height: 150px;
+  background: linear-gradient(to bottom right, #309900, #005600);
+  transform: skew(20deg) rotate(180deg);
+  border-radius: 5% 40% 70%;
+  box-shadow: inset 0px 0px 1px #222;
+  border: 1px solid #333;
+  z-index: 1;
+  -webkit-animation-duration: var(--leaf-duration, 9s);
+  animation-duration: var(--leaf-duration, 9s);
+  -webkit-animation-timing-function: ease-in-out;
+  animation-timing-function: ease-in-out;
+  -webkit-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+}
+
+.falling-leaves-layer #leaves .leaf--falling {
+  -webkit-animation-name: falling;
+  animation-name: falling;
+}
+
+.falling-leaves-layer #leaves .leaf--falling2 {
+  -webkit-animation-name: falling2;
+  animation-name: falling2;
+}
+
+.falling-leaves-layer #leaves .leaf--falling3 {
+  -webkit-animation-name: falling3;
+  animation-name: falling3;
+}
+
+.falling-leaves-layer #leaves .leaf:before {
+  position: absolute;
+  content: '';
+  top: 117px;
+  right: 9px;
+  height: 27px;
+  width: 32px;
+  transform: rotate(49deg);
+  border-radius: 0% 15% 15% 0%;
+  border-top: 1px solid #222;
+  border-bottom: 1px solid #222;
+  border-left: 0px solid #222;
+  border-right: 1px solid #222;
+  background: linear-gradient(to right, rgba(0, 100, 0, 1), #005600);
+  z-index: 1;
+}
+
+.falling-leaves-layer #leaves .leaf:after {
+  content: '';
+  height: 125px;
+  width: 10px;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0));
+  display: block;
+  transform: rotate(125deg);
+  position: absolute;
+  left: 85px;
+  border-radius: 50%;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(n) {
+  height: 23px;
+  width: 30px;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(n):before {
+  width: 7px;
+  height: 5px;
+  top: 17px;
+  right: 1px;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(n):after {
+  width: 2px;
+  height: 17px;
+  left: 12px;
+  top: 0px;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(2n + 1) {
+  height: 11px;
+  width: 16px;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(2n + 1):before {
+  width: 4px;
+  height: 3px;
+  top: 7px;
+  right: 0px;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(2n + 1):after {
+  width: 2px;
+  height: 6px;
+  left: 5px;
+  top: 1px;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(3n + 2) {
+  height: 17px;
+  width: 23px;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(3n + 2):before {
+  height: 4px;
+  width: 4px;
+  top: 12px;
+  right: 1px;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(3n + 2):after {
+  height: 10px;
+  width: 2px;
+  top: 1px;
+  left: 8px;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(n) {
+  background: linear-gradient(to bottom right, #309900, #005600);
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(2n + 2) {
+  background: linear-gradient(to bottom right, #5e9900, #2b5600);
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(4n + 1) {
+  background: linear-gradient(to bottom right, #990, #564500);
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(n) {
+  opacity: 0.42;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(3n + 1) {
+  opacity: 0.32;
+}
+
+.falling-leaves-layer #leaves .leaf:nth-of-type(3n + 2) {
+  opacity: 0.22;
+}
+
+@-webkit-keyframes falling {
+  0% {
+    -webkit-transform: translate3d(var(--leaf-start-x, 0), 0, 0) rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: translate3d(var(--leaf-drift-x, -120px), var(--leaves-fall-distance, 120vh), 0)
+      rotate(90deg);
+    opacity: 0;
+  }
+}
+
+@keyframes falling {
+  0% {
+    transform: translate3d(var(--leaf-start-x, 0), 0, 0) rotate(0deg);
+  }
+
+  100% {
+    transform: translate3d(var(--leaf-drift-x, -120px), var(--leaves-fall-distance, 120vh), 0) rotate(90deg);
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes falling3 {
+  0% {
+    -webkit-transform: translate3d(var(--leaf-start-x, 0), 0, 0) rotate(-20deg);
+  }
+
+  100% {
+    -webkit-transform: translate3d(var(--leaf-drift-x, -80px), var(--leaves-fall-distance, 120vh), 0)
+      rotate(-70deg);
+    opacity: 0;
+  }
+}
+
+@keyframes falling3 {
+  0% {
+    transform: translate3d(var(--leaf-start-x, 0), 0, 0) rotate(-20deg);
+  }
+
+  100% {
+    transform: translate3d(var(--leaf-drift-x, -80px), var(--leaves-fall-distance, 120vh), 0) rotate(-70deg);
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes falling2 {
+  0% {
+    -webkit-transform: translate3d(var(--leaf-start-x, 0), 0, 0) rotate(90deg);
+  }
+
+  100% {
+    -webkit-transform: translate3d(var(--leaf-drift-x, -160px), var(--leaves-fall-distance, 120vh), 0)
+      rotate(0deg);
+    opacity: 0;
+  }
+}
+
+@keyframes falling2 {
+  0% {
+    transform: translate3d(var(--leaf-start-x, 0), 0, 0) rotate(90deg);
+  }
+
+  100% {
+    transform: translate3d(var(--leaf-drift-x, -160px), var(--leaves-fall-distance, 120vh), 0) rotate(0deg);
+    opacity: 0;
+  }
+}

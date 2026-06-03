@@ -7,6 +7,7 @@ import { EventCalendar, CalendarEvent } from '../components/public/events/event-
 import { EventCard } from '../components/public/events/event-card';
 import { EventsError, EventsLoading } from '../components/public/events/events-loading';
 import { Footer } from '../components/public/layout/footer';
+import { FallingLeaves } from '../components/Falling-leaves';
 import { TreesBackground } from '../components/Three-background';
 import { usePublishedEvents } from '../hooks/use-published-events';
 // import { useNewsletterForm } from '../hooks/use-newsletter-form';
@@ -49,22 +50,27 @@ export function Home() {
 
       <Hero />
 
-      <section id="koledar" className="home-calendar-section">
-        <div className="home-calendar-section__container">
-          {loading ? (
-            <EventsLoading label="Nalagam koledar…" />
-          ) : error ? (
-            <EventsError message={error} onRetry={refetch} />
-          ) : (
-            <EventCalendar
-              events={calendarEvents}
-              onEventClick={(id) => navigate(`/event/${id}`)}
-            />
-          )}
+      <div className="home-after-hero">
+        <div className="home-leaves-zone">
+          <FallingLeaves />
         </div>
-      </section>
 
-      <div className="home-below-hero">
+        <section id="koledar" className="home-calendar-section">
+          <div className="home-calendar-section__container">
+            {loading ? (
+              <EventsLoading label="Nalagam koledar…" />
+            ) : error ? (
+              <EventsError message={error} onRetry={refetch} />
+            ) : (
+              <EventCalendar
+                events={calendarEvents}
+                onEventClick={(id) => navigate(`/event/${id}`)}
+              />
+            )}
+          </div>
+        </section>
+
+        <div className="home-below-hero">
         <TreesBackground />
 
         <div className="home-below-hero__content">
@@ -184,6 +190,7 @@ export function Home() {
         </div>
       </section>
       */}
+        </div>
         </div>
       </div>
 
