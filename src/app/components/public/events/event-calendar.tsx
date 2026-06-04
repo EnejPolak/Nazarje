@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Clock, Tag, CalendarDays } from 'lucide-react';
 import { categoryColorHex } from '../../../data/events';
+import { formatAriaDate } from '../../../utils/a11y-date';
 
 export interface CalendarEvent {
   id: string;
@@ -84,7 +85,10 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
     : 'Prihajajoči dogodki';
 
   return (
-    <div className="w-full flex flex-col lg:flex-row gap-0 bg-white shadow-md border border-[#1E3A2F]/8 overflow-hidden">
+    <section
+      className="w-full flex flex-col lg:flex-row gap-0 bg-white shadow-md border border-[#1E3A2F]/8 overflow-hidden"
+      aria-label="Koledar dogodkov"
+    >
       {/* Left: Calendar */}
       <div className="flex-1 p-5 lg:p-6 min-w-0 flex flex-col">
         {/* Calendar Header */}
@@ -108,7 +112,7 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
               className="flex size-9 items-center justify-center rounded-full text-[#18201B] transition-colors hover:text-[#2F5D46] hover:bg-[#F7F4EE]"
               aria-label="Prejšnji mesec"
             >
-              <ChevronLeft className="size-5" strokeWidth={2.25} />
+              <ChevronLeft className="size-5" strokeWidth={2.25} aria-hidden />
             </button>
             <button
               type="button"
@@ -117,6 +121,7 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
                 setSelectedDay(new Date().getDate());
               }}
               className="min-w-[4.5rem] px-2 py-1.5 text-sm font-bold tracking-tight text-[#18201B] transition-colors hover:text-[#2F5D46]"
+              aria-label="Prikaži tekoči mesec in današnji dan"
             >
               Danes
             </button>
@@ -126,46 +131,58 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
               className="flex size-9 items-center justify-center rounded-full text-[#18201B] transition-colors hover:text-[#2F5D46] hover:bg-[#F7F4EE]"
               aria-label="Naslednji mesec"
             >
-              <ChevronRight className="size-5" strokeWidth={2.25} />
+              <ChevronRight className="size-5" strokeWidth={2.25} aria-hidden />
             </button>
           </nav>
         </div>
 
-        {/* Legend */}
-        <div className="flex flex-wrap gap-1.5 mb-4 pb-3 border-b border-[#1E3A2F]/8">
+        {/* Legend — barva + besedilo (ne samo barva) */}
+        <ul
+          className="flex flex-wrap gap-1.5 mb-4 pb-3 border-b border-[#1E3A2F]/8 list-none m-0 p-0"
+          aria-label="Legenda kategorij dogodkov"
+        >
           {[
             { color: '#9B3A32', label: 'Nujni' },
-              { color: categoryColorHex('Kultura'), label: 'Kultura' },
-              { color: categoryColorHex('Šport'), label: 'Šport' },
-              { color: categoryColorHex('Sejem'), label: 'Sejem' },
-              { color: categoryColorHex('Delavnica'), label: 'Delavnica' },
+            { color: categoryColorHex('Kultura'), label: 'Kultura' },
+            { color: categoryColorHex('Šport'), label: 'Šport' },
+            { color: categoryColorHex('Sejem'), label: 'Sejem' },
+            { color: categoryColorHex('Delavnica'), label: 'Delavnica' },
           ].map((item) => (
-            <div
+            <li
               key={item.label}
               className="flex items-center gap-1.5 px-2 py-0.5 bg-[#F7F4EE]"
             >
-              <span className="w-1.5 h-1.5 shrink-0" style={{ backgroundColor: item.color }} />
-              <span className="text-[10px]" style={{ color: item.color }}>{item.label}</span>
-            </div>
+              <span className="w-1.5 h-1.5 shrink-0" style={{ backgroundColor: item.color }} aria-hidden />
+              <span className="text-[10px]" style={{ color: item.color }}>
+                {item.label}
+              </span>
+            </li>
           ))}
-        </div>
+        </ul>
 
         {/* Day Names */}
-        <div className="grid grid-cols-7 mb-1">
+        <div className="grid grid-cols-7 mb-1" role="row">
           {dayNames.map((day, i) => (
             <div
               key={day}
+              role="columnheader"
               className={`text-center text-[11px] py-1 uppercase tracking-widest font-medium ${
                 i >= 5 ? 'text-[#5a5f5c]' : 'text-[#18201B]'
               }`}
             >
-              {day}
+              <abbr title={day} className="no-underline">
+                {day}
+              </abbr>
             </div>
           ))}
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-1 flex-1 content-start">
+        <div
+          className="grid grid-cols-7 gap-1 flex-1 content-start"
+          role="grid"
+          aria-label={`Dnevi v mesecu ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`}
+        >
           {emptyDays.map((_, index) => (
             <div key={`empty-${index}`} className="h-16" />
           ))}
@@ -183,11 +200,25 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
                 : categoryColorHex(firstEvent.category)
               : '';
 
+            const ariaDayLabel = [
+              formatAriaDate(date),
+              hasEvents
+                ? `${dayEvents.length} ${dayEvents.length === 1 ? 'dogodek' : 'dogodki'}`
+                : 'brez dogodkov',
+              isTodayDate ? 'danes' : '',
+              isSelected ? 'izbrano' : '',
+            ]
+              .filter(Boolean)
+              .join(', ');
+
             return (
               <button
                 key={day}
+                type="button"
                 onClick={() => setSelectedDay(isSelected ? null : day)}
-                className={`relative h-16 flex items-center justify-center px-1 transition-all cursor-pointer
+                aria-label={ariaDayLabel}
+                aria-pressed={isSelected}
+                className={`event-calendar-day relative h-16 flex items-center justify-center px-1 transition-all cursor-pointer
                   ${isSelected
                     ? hasEvents ? '' : 'bg-[#1E3A2F]'
                     : isTodayDate
@@ -245,78 +276,91 @@ export function EventCalendar({ events, onEventClick }: EventCalendarProps) {
       </div>
 
       {/* Divider */}
-      <div className="hidden lg:block w-px bg-[#1E3A2F]/8 self-stretch" />
-      <div className="lg:hidden h-px bg-[#1E3A2F]/8 mx-5" />
+      <div className="hidden lg:block w-px bg-[#1E3A2F]/8 self-stretch" aria-hidden />
+      <div className="lg:hidden h-px bg-[#1E3A2F]/8 mx-5" aria-hidden />
 
       {/* Right: Event Panel */}
-      <div className="w-full lg:w-72 xl:w-80 p-5 lg:p-6 flex flex-col shrink-0">
+      <aside
+        className="w-full lg:w-72 xl:w-80 p-5 lg:p-6 flex flex-col shrink-0"
+        aria-labelledby="calendar-events-panel-title"
+        aria-live="polite"
+      >
         <div className="mb-4 min-w-0">
-          <h3 className="text-base font-semibold text-[#18201B]/60 uppercase tracking-wide whitespace-nowrap">
+          <h3
+            id="calendar-events-panel-title"
+            className="text-base font-semibold text-[#18201B]/60 uppercase tracking-wide whitespace-nowrap"
+          >
             {panelTitle}
           </h3>
         </div>
 
         {displayEvents.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
-            <CalendarDays className="w-8 h-8 text-[#18201B]/15 mb-2" />
+            <CalendarDays className="w-8 h-8 text-[#18201B]/15 mb-2" aria-hidden />
             <p className="text-sm text-[#18201B]/40">Ni dogodkov</p>
             <p className="text-[11px] text-[#18201B]/30 mt-0.5">za izbrani dan</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2.5 flex-1 overflow-y-auto">
+          <ul className="flex flex-col gap-2.5 flex-1 overflow-y-auto list-none m-0 p-0">
             {displayEvents.map((event) => {
               const color = event.isImportant ? '#9B3A32' : categoryColorHex(event.category);
+              const eventAria = `${event.title}, ${formatAriaDate(event.date)}${event.time ? `, ${event.time}` : ''}, ${event.category}`;
               return (
-                <div
-                  key={event.id}
-                  className="group flex gap-3 p-3 hover:bg-[#F7F4EE] transition-colors cursor-pointer"
-                  onClick={() => onEventClick?.(event.id)}
-                >
-                  <div
-                    className="w-0.5 shrink-0 self-stretch"
-                    style={{ backgroundColor: color }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#18201B] leading-snug line-clamp-2 group-hover:text-[#1E3A2F] transition-colors">
-                      {event.title}
-                    </p>
-                    <div className="flex flex-wrap gap-x-2.5 gap-y-0.5 mt-1.5">
-                      {selectedEvents.length === 0 && (
-                        <span className="text-[11px] text-[#18201B]/50 flex items-center gap-1">
-                          <CalendarDays className="w-3 h-3" />
-                          {event.date.getDate()}. {monthNames[event.date.getMonth()]}
+                <li key={event.id}>
+                  <button
+                    type="button"
+                    className="group flex gap-3 p-3 hover:bg-[#F7F4EE] transition-colors cursor-pointer w-full text-left"
+                    onClick={() => onEventClick?.(event.id)}
+                    aria-label={`Odpri dogodek: ${eventAria}`}
+                  >
+                    <div
+                      className="w-0.5 shrink-0 self-stretch"
+                      style={{ backgroundColor: color }}
+                      aria-hidden
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-[#18201B] leading-snug line-clamp-2 group-hover:text-[#1E3A2F] transition-colors">
+                        {event.title}
+                      </p>
+                      <div className="flex flex-wrap gap-x-2.5 gap-y-0.5 mt-1.5">
+                        {selectedEvents.length === 0 && (
+                          <span className="text-[11px] text-[#18201B]/50 flex items-center gap-1">
+                            <CalendarDays className="w-3 h-3" aria-hidden />
+                            {event.date.getDate()}. {monthNames[event.date.getMonth()]}
+                          </span>
+                        )}
+                        {event.time && (
+                          <span className="text-[11px] text-[#18201B]/50 flex items-center gap-1">
+                            <Clock className="w-3 h-3" aria-hidden />
+                            {event.time}
+                          </span>
+                        )}
+                        <span
+                          className="text-[11px] flex items-center gap-1"
+                          style={{ color }}
+                        >
+                          <Tag className="w-3 h-3" aria-hidden />
+                          {event.category}
                         </span>
-                      )}
-                      {event.time && (
-                        <span className="text-[11px] text-[#18201B]/50 flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {event.time}
-                        </span>
-                      )}
-                      <span
-                        className="text-[11px] flex items-center gap-1"
-                        style={{ color }}
-                      >
-                        <Tag className="w-3 h-3" />
-                        {event.category}
-                      </span>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </button>
+                </li>
               );
             })}
-          </div>
+          </ul>
         )}
 
         {selectedEvents.length === 0 && monthEvents.length > 4 && (
-          <button className="mt-3 text-xs text-[#3D6F7A] hover:text-[#2F5D46] transition-colors self-start">
+          <button
+            type="button"
+            className="mt-3 text-xs text-[#3D6F7A] hover:text-[#2F5D46] transition-colors self-start"
+            aria-label="Prikaži vse dogodke na strani vsi dogodki"
+          >
             Vsi dogodki →
           </button>
         )}
-
-        {/* Newsletter CTA */}
-        
-      </div>
-    </div>
+      </aside>
+    </section>
   );
 }

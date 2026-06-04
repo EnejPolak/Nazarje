@@ -36,6 +36,8 @@ export function Header() {
     return (
       <button
         key={path}
+        type="button"
+        aria-current={isActive ? 'page' : undefined}
         onClick={() => handleNav(path, section)}
         className={`relative px-4 py-2 text-base font-medium tracking-wide transition-colors ${
           isActive
@@ -53,6 +55,7 @@ export function Header() {
 
   return (
     <header
+      role="banner"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
           ? 'bg-[#F7F4EE]/92 backdrop-blur-xl border-b border-[#1E3A2F]/12 shadow-sm'
@@ -63,7 +66,7 @@ export function Header() {
         <div className="relative flex items-center justify-between h-16">
 
           {/* Left nav */}
-          <nav className="hidden md:flex items-center">
+          <nav className="hidden md:flex items-center" aria-label="Glavna navigacija">
             {navBtn('Domov', '/', 'domov')}
             {navBtn('Vsi dogodki', '/events')}
           </nav>
@@ -71,8 +74,9 @@ export function Header() {
           {/* Center: coat of arms in circle — absolutely centered */}
           <div className="absolute left-1/2 -translate-x-1/2">
             <button
+              type="button"
               onClick={() => handleNav('/', 'domov')}
-              aria-label="Domov"
+              aria-label="Domov — Nazarje dogodki"
               className="opacity-90 hover:opacity-100 transition-opacity"
             >
               <img
@@ -84,15 +88,18 @@ export function Header() {
           </div>
 
           {/* Right nav */}
-          <nav className="hidden md:flex items-center">
+          <nav className="hidden md:flex items-center" aria-label="Dodatna navigacija">
             {navBtn('Pretekli dogodki', '/past-events')}
           </nav>
 
           {/* Mobile hamburger */}
           <button
+            type="button"
             className="md:hidden flex flex-col gap-1.5 p-2 text-[#1E3A2F] hover:text-[#2F5D46] transition-colors ml-auto"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Meni"
+            aria-label={menuOpen ? 'Zapri meni' : 'Odpri meni'}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-nav-panel"
           >
             <span className={`w-5 h-px bg-current transition-all duration-200 ${menuOpen ? 'translate-y-[7px] rotate-45' : ''}`} />
             <span className={`w-5 h-px bg-current transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
@@ -113,18 +120,23 @@ export function Header() {
               transition={{ duration: 0.2 }}
               onClick={() => setMenuOpen(false)}
               className="fixed inset-0 bg-black/40 md:hidden z-40"
+              aria-hidden="true"
             />
 
             {/* Slide-in menu */}
             <motion.div
+              id="mobile-nav-panel"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="fixed left-0 top-16 bottom-0 w-64 bg-[#F7F4EE]/96 backdrop-blur-xl md:hidden z-50 border-r border-[#1E3A2F]/10"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Meni za mobilne naprave"
             >
               {/* Navigation links */}
-              <nav className="px-6 py-6 flex flex-col gap-2">
+              <nav className="px-6 py-6 flex flex-col gap-2" aria-label="Mobilna navigacija">
                 {[
                   { label: 'Domov',            path: '/',            section: 'domov' },
                   { label: 'Vsi dogodki',      path: '/events' },
@@ -134,6 +146,8 @@ export function Header() {
                   return (
                     <motion.button
                       key={link.path}
+                      type="button"
+                      aria-current={isActive ? 'page' : undefined}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}

@@ -14,7 +14,7 @@ export function EventDetailHero({ event, onBack, children }: EventDetailHeroProp
   return (
     <section className="event-detail-hero">
       {event.imageUrl ? (
-        <img src={event.imageUrl} alt="" className="event-detail-hero__bg" />
+        <img src={event.imageUrl} alt={event.title} className="event-detail-hero__bg" />
       ) : (
         <div className="event-detail-hero__bg event-detail-hero__bg--placeholder" aria-hidden />
       )}
@@ -22,7 +22,7 @@ export function EventDetailHero({ event, onBack, children }: EventDetailHeroProp
       <div className="event-detail-hero__shade" aria-hidden />
 
       <button type="button" onClick={onBack} className="event-detail-hero__back">
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4" aria-hidden />
         <span>Nazaj</span>
       </button>
 
@@ -51,39 +51,39 @@ export function EventDetailHero({ event, onBack, children }: EventDetailHeroProp
 
           <h1 className="event-detail-hero__title">{event.title}</h1>
 
-          <div className="event-detail-hero__meta">
+          <dl className="event-detail-hero__meta">
             <div className="event-detail-hero__meta-item">
-              <Calendar className="event-detail-hero__meta-icon" />
+              <Calendar className="event-detail-hero__meta-icon" aria-hidden />
               <div>
-                <p className="event-detail-hero__meta-label">
+                <dt className="event-detail-hero__meta-label">
                   {event.dateEnd ? 'Datum (od – do)' : 'Datum'}
-                </p>
-                <p className="event-detail-hero__meta-value">
+                </dt>
+                <dd className="event-detail-hero__meta-value">
                   {formatSlovenianDateRange(event.date, event.dateEnd)}
-                </p>
+                </dd>
               </div>
             </div>
 
             <div className="event-detail-hero__meta-item">
-              <Clock className="event-detail-hero__meta-icon" />
+              <Clock className="event-detail-hero__meta-icon" aria-hidden />
               <div>
-                <p className="event-detail-hero__meta-label">
+                <dt className="event-detail-hero__meta-label">
                   {event.timeEnd ? 'Čas (od – do)' : 'Čas'}
-                </p>
-                <p className="event-detail-hero__meta-value">
+                </dt>
+                <dd className="event-detail-hero__meta-value">
                   {formatEventTimeRange(event.time, event.timeEnd)}
-                </p>
+                </dd>
               </div>
             </div>
 
             <div className="event-detail-hero__meta-item">
-              <MapPin className="event-detail-hero__meta-icon" />
+              <MapPin className="event-detail-hero__meta-icon" aria-hidden />
               <div>
-                <p className="event-detail-hero__meta-label">Lokacija</p>
-                <p className="event-detail-hero__meta-value">{event.location}</p>
+                <dt className="event-detail-hero__meta-label">Lokacija</dt>
+                <dd className="event-detail-hero__meta-value">{event.location}</dd>
               </div>
             </div>
-          </div>
+          </dl>
         </div>
 
         {children}

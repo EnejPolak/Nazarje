@@ -8,7 +8,9 @@ import { EventShareCard } from '../components/public/event-detail/event-share-ca
 import { EventsError, EventsLoading } from '../components/public/events/events-loading';
 import { Header } from '../components/public/layout/header';
 import { Footer } from '../components/public/layout/footer';
+import { SkipLink } from '../components/public/layout/skip-link';
 import { useEventDetail } from '../hooks/use-event-detail';
+import { usePageMeta } from '../hooks/use-page-meta';
 import { formatSlovenianDate } from '../utils/event-date';
 import '../styles/components/event-detail.css';
 
@@ -18,11 +20,27 @@ export function EventDetail() {
   const { event, loading, error, refetch } = useEventDetail(id);
   const [copied, setCopied] = useState(false);
 
+  usePageMeta(
+    event
+      ? {
+          title: `${event.title} · Nazarje Dogodki`,
+          description: event.description,
+          canonicalUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+        }
+      : {
+          title: 'Dogodek · Nazarje Dogodki',
+          description: 'Podrobnosti dogodka v Nazarjah.',
+        }
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F7F4EE] flex flex-col">
+        <SkipLink />
         <Header />
-        <EventsLoading label="Nalagam dogodek…" />
+        <main id="main-content" className="flex-1">
+          <EventsLoading label="Nalagam dogodek…" />
+        </main>
         <Footer />
       </div>
     );
@@ -31,8 +49,12 @@ export function EventDetail() {
   if (error || !event) {
     return (
       <div className="min-h-screen bg-[#F7F4EE] flex flex-col items-center justify-center px-4">
+        <SkipLink />
         <Header />
-        <div className="flex-1 flex flex-col items-center justify-center py-16">
+        <main
+          id="main-content"
+          className="flex-1 flex flex-col items-center justify-center py-16 w-full"
+        >
           <p className="text-[#18201B] text-xl mb-4">
             {error ?? 'Dogodek ni bil najden.'}
           </p>
@@ -46,12 +68,13 @@ export function EventDetail() {
             </button>
           )}
           <button
+            type="button"
             onClick={() => navigate('/')}
             className="event-detail-back-button max-w-xs"
           >
             Nazaj na domačo stran
           </button>
-        </div>
+        </main>
         <Footer />
       </div>
     );
@@ -85,34 +108,37 @@ export function EventDetail() {
 
   return (
     <div className="event-detail-page">
+      <SkipLink />
       <Header />
 
-      <EventDetailHero event={event} onBack={() => navigate(-1)}>
-        <div className="event-detail-content">
-          <div className="event-detail-main">
-            <EventDescription description={event.longDescription} />
-            <EventAttachments attachments={event.attachments} />
+      <main id="main-content">
+        <EventDetailHero event={event} onBack={() => navigate(-1)}>
+          <div className="event-detail-content">
+            <div className="event-detail-main">
+              <EventDescription description={event.longDescription} />
+              <EventAttachments attachments={event.attachments} />
+            </div>
+
+            <aside className="event-detail-sidebar">
+              <EventLocationCard event={event} />
+              <EventShareCard
+                copied={copied}
+                onFacebookShare={shareFacebook}
+                onInstagramShare={shareInstagram}
+                onCopyLink={copyLink}
+              />
+
+              <button
+                type="button"
+                onClick={() => navigate('/events')}
+                className="event-detail-back-button"
+              >
+                ← Vsi dogodki
+              </button>
+            </aside>
           </div>
-
-          <aside className="event-detail-sidebar">
-            <EventLocationCard event={event} />
-            <EventShareCard
-              copied={copied}
-              onFacebookShare={shareFacebook}
-              onInstagramShare={shareInstagram}
-              onCopyLink={copyLink}
-            />
-
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="event-detail-back-button"
-            >
-              ← Vsi dogodki
-            </button>
-          </aside>
-        </div>
-      </EventDetailHero>
+        </EventDetailHero>
+      </main>
 
       <Footer />
     </div>

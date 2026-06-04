@@ -282,6 +282,10 @@
   line-height: 1.35;
 }
 
+.event-detail-hero__meta-item dd {
+  margin: 0;
+}
+
 .event-detail-hero .event-detail-panel {
   background: rgb(255 255 255 / 0.14);
   border: 1px solid rgb(255 255 255 / 0.22);

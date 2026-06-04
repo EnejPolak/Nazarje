@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import { Calendar, Clock, ChevronRight, Paperclip } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
@@ -45,22 +46,37 @@ export function EventCard({
   index = 0,
   ctaLabel = 'Preberi več',
 }: EventCardProps) {
+  const dateLabel = formatCompactSlovenianDateRange(event.date, event.dateEnd);
+  const cardLabel = `${event.title}. ${dateLabel}, ${event.time}. Kategorija: ${event.category}. ${ctaLabel}.`;
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
-    <motion.div
+    <motion.article
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.45, delay: (index % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.45, delay: (index % 3) * 0.1, ease: [0.22, 1, 0.36, 1] as const }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className="event-card group"
+      role="button"
+      tabIndex={0}
+      aria-label={cardLabel}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
     >
       {event.imageUrl && (
         <div className="event-card__image-wrap">
           <div className="event-card__image-motion">
             <ImageWithFallback
               src={event.imageUrl}
-              alt={event.title}
+              alt=""
+              aria-hidden
               className={`event-card__image ${grayscale ? 'grayscale group-hover:grayscale-0' : ''}`}
             />
           </div>
@@ -73,39 +89,42 @@ export function EventCard({
           {event.category}
         </span>
 
-        <div>
-          <h3 className="event-card__title">
-            {event.title}
-          </h3>
-        </div>
+        <h3 className="event-card__title">{event.title}</h3>
 
-        <div className="event-card__meta">
-          <div className="event-card__meta-item">
-            <Calendar />
-            <span>{formatCompactSlovenianDateRange(event.date, event.dateEnd)}</span>
-          </div>
-          <div className="event-card__meta-item">
-            <Clock />
-            <span>{event.time}</span>
-          </div>
-        </div>
+        <ul className="event-card__meta" aria-label="Podatki o terminu">
+          <li className="event-card__meta-item">
+            <Calendar aria-hidden />
+            <span>
+              <span className="sr-only">Datum: </span>
+              {dateLabel}
+            </span>
+          </li>
+          <li className="event-card__meta-item">
+            <Clock aria-hidden />
+            <span>
+              <span className="sr-only">Ura: </span>
+              {event.time}
+            </span>
+          </li>
+        </ul>
 
-        <p className="event-card__description">
-          {truncateWords(event.description, 5)}
-        </p>
+        <p className="event-card__description">{truncateWords(event.description, 5)}</p>
 
         {event.attachments && event.attachments.length > 0 && (
           <div className="event-card__attachments">
-            <Paperclip />
-            <span>{event.attachments.length} {event.attachments.length === 1 ? 'priponka' : 'priponki'}</span>
+            <Paperclip aria-hidden />
+            <span>
+              {event.attachments.length}{' '}
+              {event.attachments.length === 1 ? 'priponka' : 'priponki'}
+            </span>
           </div>
         )}
 
-        <button type="button" className="event-card__button">
+        <span className="event-card__button" aria-hidden>
           {ctaLabel}
-          <ChevronRight className="event-card__button-icon" />
-        </button>
+          <ChevronRight className="event-card__button-icon" aria-hidden />
+        </span>
       </div>
-    </motion.div>
+    </motion.article>
   );
 }

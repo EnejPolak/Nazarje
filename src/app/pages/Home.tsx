@@ -10,6 +10,9 @@ import { Footer } from '../components/public/layout/footer';
 import { FallingLeaves } from '../components/Falling-leaves';
 import { TreesBackground } from '../components/Three-background';
 import { usePublishedEvents } from '../hooks/use-published-events';
+import { usePageMeta, PAGE_META_DEFAULTS } from '../hooks/use-page-meta';
+import { SkipLink } from '../components/public/layout/skip-link';
+import { eventDetailPath } from '../utils/event-path';
 // import { useNewsletterForm } from '../hooks/use-newsletter-form';
 import '../styles/components/home.css';
 
@@ -21,8 +24,11 @@ const fadeUpInView = (delay = 0) => ({
 });
 
 export function Home() {
+  usePageMeta(PAGE_META_DEFAULTS.home);
   const navigate = useNavigate();
   const { events, loading, error, refetch } = usePublishedEvents();
+
+  const eventsById = useMemo(() => new Map(events.map((e) => [e.id, e])), [events]);
   // const newsletter = useNewsletterForm('home');
 
   const upcomingEvents = useMemo(() => {
@@ -45,9 +51,11 @@ export function Home() {
   }));
 
   return (
-    <div className="min-h-screen bg-[#F7F4EE]">
+    <div className="min-h-screen bg-[#F7F4EE] flex flex-col">
+      <SkipLink />
       <Header />
 
+      <main id="main-content">
       <Hero />
 
       <div className="home-after-hero">
@@ -55,7 +63,10 @@ export function Home() {
           <FallingLeaves />
         </div>
 
-        <section id="koledar" className="home-calendar-section">
+        <section id="koledar" className="home-calendar-section" aria-labelledby="calendar-section-heading">
+          <h2 id="calendar-section-heading" className="sr-only">
+            Koledar dogodkov
+          </h2>
           <div className="home-calendar-section__container">
             {loading ? (
               <EventsLoading label="Nalagam koledar…" />
@@ -64,7 +75,10 @@ export function Home() {
             ) : (
               <EventCalendar
                 events={calendarEvents}
-                onEventClick={(id) => navigate(`/event/${id}`)}
+                onEventClick={(id) => {
+                  const ev = eventsById.get(id);
+                  navigate(ev ? eventDetailPath(ev) : `/event/${id}`);
+                }}
               />
             )}
           </div>
@@ -74,10 +88,10 @@ export function Home() {
         <TreesBackground />
 
         <div className="home-below-hero__content">
-      <section id="dogodki" className="py-16 bg-transparent">
-        <div className="max-w-7xl mx-auto px-6">
+        <section id="dogodki" className="py-16 bg-transparent" aria-labelledby="upcoming-events-heading">
+          <div className="max-w-7xl mx-auto px-6">
           <motion.div {...fadeUpInView(0)} className="text-center mb-12">
-            <h2 className="text-3xl text-[#18201B] mb-4">Prihajajoči dogodki</h2>
+            <h2 id="upcoming-events-heading" className="text-3xl text-[#18201B] mb-4">Prihajajoči dogodki</h2>
             <p className="text-[#18201B]/70 max-w-2xl mx-auto">Kliknite na kartico za vse podrobnosti</p>
           </motion.div>
 
@@ -92,7 +106,7 @@ export function Home() {
                   key={event.id}
                   event={event}
                   index={i}
-                  onClick={() => navigate(`/event/${event.id}`)}
+                  onClick={() => navigate(eventDetailPath(event))}
                 />
               ))}
             </div>
@@ -193,6 +207,7 @@ export function Home() {
         </div>
         </div>
       </div>
+      </main>
 
       <Footer />
     </div>
