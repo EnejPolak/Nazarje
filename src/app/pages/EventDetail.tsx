@@ -4,7 +4,6 @@ import { EventAttachments } from '../components/public/event-detail/event-attach
 import { EventDescription } from '../components/public/event-detail/event-description';
 import { EventDetailHero } from '../components/public/event-detail/event-detail-hero';
 import { EventLocationCard } from '../components/public/event-detail/event-location-card';
-import { EventMetaCard } from '../components/public/event-detail/event-meta-card';
 import { EventShareCard } from '../components/public/event-detail/event-share-card';
 import { EventsError, EventsLoading } from '../components/public/events/events-loading';
 import { Header } from '../components/public/layout/header';
@@ -48,7 +47,7 @@ export function EventDetail() {
           )}
           <button
             onClick={() => navigate('/')}
-            className="bg-[#2F5D46] text-white px-6 py-3 rounded-lg hover:bg-[#1E3A2F] transition-colors"
+            className="event-detail-back-button max-w-xs"
           >
             Nazaj na domačo stran
           </button>
@@ -88,34 +87,32 @@ export function EventDetail() {
     <div className="event-detail-page">
       <Header />
 
-      <EventDetailHero event={event} onBack={() => navigate(-1)} />
+      <EventDetailHero event={event} onBack={() => navigate(-1)}>
+        <div className="event-detail-content">
+          <div className="event-detail-main">
+            <EventDescription description={event.longDescription} />
+            <EventAttachments attachments={event.attachments} />
+          </div>
 
-      <div className="event-detail-content">
-        <div>
-          <h1 className="event-detail-title">{event.title}</h1>
+          <aside className="event-detail-sidebar">
+            <EventLocationCard event={event} />
+            <EventShareCard
+              copied={copied}
+              onFacebookShare={shareFacebook}
+              onInstagramShare={shareInstagram}
+              onCopyLink={copyLink}
+            />
 
-          <EventMetaCard event={event} />
-          <EventDescription description={event.longDescription} />
-          <EventAttachments attachments={event.attachments} />
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              className="event-detail-back-button"
+            >
+              ← Vsi dogodki
+            </button>
+          </aside>
         </div>
-
-        <div className="event-detail-sidebar">
-          <EventLocationCard event={event} />
-          <EventShareCard
-            copied={copied}
-            onFacebookShare={shareFacebook}
-            onInstagramShare={shareInstagram}
-            onCopyLink={copyLink}
-          />
-
-          <button
-            onClick={() => navigate('/')}
-            className="event-detail-back-button"
-          >
-            ← Vsi dogodki
-          </button>
-        </div>
-      </div>
+      </EventDetailHero>
 
       <Footer />
     </div>

@@ -1,53 +1,93 @@
-import React from 'react';
-import { ArrowLeft } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { ArrowLeft, Calendar, Clock, MapPin } from 'lucide-react';
 import type { EventData } from '../../../data/events';
 import { categoryColorHex } from '../../../data/events';
+import { formatEventTimeRange, formatSlovenianDateRange } from '../../../utils/event-date';
 
 interface EventDetailHeroProps {
   event: EventData;
   onBack: () => void;
+  children?: ReactNode;
 }
 
-export function EventDetailHero({ event, onBack }: EventDetailHeroProps) {
+export function EventDetailHero({ event, onBack, children }: EventDetailHeroProps) {
   return (
-    <div className="relative h-72 md:h-96 mt-16 overflow-hidden">
-      {event.imageUrl && (
-        <img
-          src={event.imageUrl}
-          alt={event.title}
-          className="w-full h-full object-cover object-center"
-        />
+    <section className="event-detail-hero">
+      {event.imageUrl ? (
+        <img src={event.imageUrl} alt="" className="event-detail-hero__bg" />
+      ) : (
+        <div className="event-detail-hero__bg event-detail-hero__bg--placeholder" aria-hidden />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#1E3A2F]/80 via-[#1E3A2F]/30 to-transparent" />
 
-      <button
-        onClick={onBack}
-        className="absolute top-5 left-5 flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm border border-white/20 text-white px-4 py-2 rounded-full transition-colors"
-      >
+      <div className="event-detail-hero__shade" aria-hidden />
+
+      <button type="button" onClick={onBack} className="event-detail-hero__back">
         <ArrowLeft className="w-4 h-4" />
-        <span className="text-sm">Nazaj</span>
+        <span>Nazaj</span>
       </button>
 
-      <div className="absolute bottom-5 left-5 md:left-8 flex flex-wrap gap-2">
-        <span
-          className="px-3 py-1 rounded-full text-sm text-white"
-          style={{ backgroundColor: categoryColorHex(event.category) }}
-        >
-          {event.category}
-        </span>
-        {event.isImportant && (
-          <span
-            className="px-3 py-1 rounded-full text-sm text-white"
-            style={{
-              backgroundColor: event.secondaryFilter
-                ? categoryColorHex(event.secondaryFilter)
-                : '#9B3A32',
-            }}
-          >
-            {event.secondaryFilter || 'Nujno'}
-          </span>
-        )}
+      <div className="event-detail-hero__body">
+        <div className="event-detail-hero__intro">
+          <div className="event-detail-hero__badges">
+            <span
+              className="event-detail-hero__badge"
+              style={{ backgroundColor: categoryColorHex(event.category) }}
+            >
+              {event.category}
+            </span>
+            {event.isImportant && (
+              <span
+                className="event-detail-hero__badge"
+                style={{
+                  backgroundColor: event.secondaryFilter
+                    ? categoryColorHex(event.secondaryFilter)
+                    : '#9B3A32',
+                }}
+              >
+                {event.secondaryFilter || 'Nujno'}
+              </span>
+            )}
+          </div>
+
+          <h1 className="event-detail-hero__title">{event.title}</h1>
+
+          <div className="event-detail-hero__meta">
+            <div className="event-detail-hero__meta-item">
+              <Calendar className="event-detail-hero__meta-icon" />
+              <div>
+                <p className="event-detail-hero__meta-label">
+                  {event.dateEnd ? 'Datum (od – do)' : 'Datum'}
+                </p>
+                <p className="event-detail-hero__meta-value">
+                  {formatSlovenianDateRange(event.date, event.dateEnd)}
+                </p>
+              </div>
+            </div>
+
+            <div className="event-detail-hero__meta-item">
+              <Clock className="event-detail-hero__meta-icon" />
+              <div>
+                <p className="event-detail-hero__meta-label">
+                  {event.timeEnd ? 'Čas (od – do)' : 'Čas'}
+                </p>
+                <p className="event-detail-hero__meta-value">
+                  {formatEventTimeRange(event.time, event.timeEnd)}
+                </p>
+              </div>
+            </div>
+
+            <div className="event-detail-hero__meta-item">
+              <MapPin className="event-detail-hero__meta-icon" />
+              <div>
+                <p className="event-detail-hero__meta-label">Lokacija</p>
+                <p className="event-detail-hero__meta-value">{event.location}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {children}
       </div>
-    </div>
+    </section>
   );
 }

@@ -10,11 +10,11 @@ export function EventAttachments({ attachments }: EventAttachmentsProps) {
   if (!attachments || attachments.length === 0) return null;
 
   return (
-    <div className="mt-6 bg-white rounded-2xl border border-[#1E3A2F]/8 shadow-sm p-6 md:p-8">
+    <div className="event-detail-panel p-6 md:p-8">
       <div className="flex items-center gap-2 mb-5">
-        <FileText className="w-5 h-5 text-[#2F5D46]" />
-        <h2 className="text-lg text-[#18201B]">Priponke</h2>
-        <span className="ml-auto text-xs text-[#18201B]/35 bg-[#F7F4EE] px-2 py-0.5 rounded-full">
+        <FileText className="w-5 h-5 event-detail-panel-icon" />
+        <h2 className="event-detail-panel-heading mb-0">Priponke</h2>
+        <span className="ml-auto text-xs text-white/70 bg-white/15 px-2 py-0.5 rounded-full">
           {attachments.length}
         </span>
       </div>
@@ -29,13 +29,11 @@ export function EventAttachments({ attachments }: EventAttachmentsProps) {
               href={attachment.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-4 p-4 rounded-xl bg-[#F7F4EE] hover:bg-[#EAF1EA] border border-[#1E3A2F]/8 hover:border-[#2F5D46]/25 transition-all group"
+              className="event-detail-attachment group"
             >
               <div
-                className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
-                  isPdf
-                    ? 'bg-red-50 border border-red-100'
-                    : 'bg-white border border-[#1E3A2F]/8'
+                className={`event-detail-attachment__icon ${
+                  isPdf ? 'event-detail-attachment__icon--pdf' : 'event-detail-attachment__icon--file'
                 }`}
               >
                 {isPdf ? (
@@ -48,13 +46,13 @@ export function EventAttachments({ attachments }: EventAttachmentsProps) {
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-[#18201B] group-hover:text-[#2F5D46] transition-colors truncate">
+                <p className="text-sm text-white group-hover:text-[#c8e6d0] transition-colors truncate">
                   {attachment.name}
                 </p>
-                {isPdf && <p className="text-xs text-[#18201B]/40 mt-0.5">PDF dokument</p>}
+                {isPdf && <p className="event-detail-panel-muted text-xs mt-0.5">PDF dokument</p>}
               </div>
 
-              <div className="flex items-center gap-1.5 text-xs text-[#18201B]/35 group-hover:text-[#2F5D46] transition-colors shrink-0">
+              <div className="flex items-center gap-1.5 text-xs text-white/50 group-hover:text-white/80 transition-colors shrink-0">
                 <Download className="w-4 h-4" />
                 <span className="hidden sm:inline">Prenesi</span>
               </div>

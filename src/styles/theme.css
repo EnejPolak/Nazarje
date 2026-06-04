@@ -44,6 +44,7 @@
   --page-content-max-width: 80rem;
   --page-content-padding: 1.5rem;
   --calendar-inner-padding: 1.25rem;
+  --event-surface-radius: 1rem;
 }
 
 .dark {
