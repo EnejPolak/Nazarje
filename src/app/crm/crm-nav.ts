@@ -33,7 +33,7 @@ export const CRM_NAV_ITEMS: CrmNavItem[] = [
   },
   {
     id: 'published',
-    label: 'Objavljeni dogodki',
+    label: 'Prihajajoči dogodki',
     path: '/admin/dashboard/objavljeni',
     icon: Globe,
     iconActive: Globe,

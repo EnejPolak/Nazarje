@@ -27,6 +27,9 @@ interface EventCardProps {
   index?: number;
   /** Besedilo gumba (privzeto: Preberi več) */
   ctaLabel?: string;
+  /** CRM: prikaži badge Objavljeno / Osnutek */
+  showPublishStatus?: boolean;
+  published?: boolean;
 }
 
 function truncateWords(text: string, maxWords: number) {
@@ -45,6 +48,8 @@ export function EventCard({
   grayscale,
   index = 0,
   ctaLabel = 'Preberi več',
+  showPublishStatus = false,
+  published = true,
 }: EventCardProps) {
   const dateLabel = formatCompactSlovenianDateRange(event.date, event.dateEnd);
   const cardLabel = `${event.title}. ${dateLabel}, ${event.time}. Kategorija: ${event.category}. ${ctaLabel}.`;
@@ -83,11 +88,24 @@ export function EventCard({
         </div>
       )}
       <div className="event-card__body">
-        <span
-          className={`event-card__badge ${categoryBadgeBgClass(event.category)}`}
-        >
-          {event.category}
-        </span>
+        <div className="flex flex-wrap gap-1.5 mb-1">
+          {showPublishStatus && (
+            <span
+              className={`event-card__badge ${
+                published === false
+                  ? 'bg-[#18201B]/10 text-[#18201B]/70'
+                  : 'bg-[#EAF1EA] text-[#2F5D46]'
+              }`}
+            >
+              {published === false ? 'Osnutek' : 'Objavljeno'}
+            </span>
+          )}
+          <span
+            className={`event-card__badge ${categoryBadgeBgClass(event.category)}`}
+          >
+            {event.category}
+          </span>
+        </div>
 
         <h3 className="event-card__title">{event.title}</h3>
 

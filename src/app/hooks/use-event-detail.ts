@@ -13,15 +13,15 @@ async function fetchEventByParam(param: string): Promise<EventData> {
   }
 
   try {
-    return await fetchEventById(param);
+    return await fetchEventBySlug(param);
   } catch (e) {
-    const trySlug =
+    const tryId =
       e instanceof ApiError
         ? e.status === 404
         : e instanceof Error && /ni bil najden/i.test(e.message);
 
-    if (trySlug) {
-      return fetchEventBySlug(param);
+    if (tryId) {
+      return fetchEventById(param);
     }
     throw e;
   }

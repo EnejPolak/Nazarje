@@ -2,11 +2,16 @@ import { Link } from 'react-router';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { useNewsletterForm } from '../../../hooks/use-newsletter-form';
 import { useCookieConsentContext } from '../../../context/cookie-consent-context';
+import { getFacebookUrl, getInstagramUrl, getObcinaUrl } from '../../../utils/site-config';
 
 export function Footer() {
-  const { email, setEmail, subscribed, error, submitting, handleSubmit } =
+  const { email, setEmail, gdprConsent, setGdprConsent, subscribed, error, submitting, handleSubmit } =
     useNewsletterForm('footer');
   const { reopenBanner } = useCookieConsentContext();
+
+  const facebookUrl = getFacebookUrl();
+  const instagramUrl = getInstagramUrl();
+  const obcinaUrl = getObcinaUrl();
 
   return (
     <footer id="kontakt" role="contentinfo" className="bg-[#1E3A2F] text-white">
@@ -41,13 +46,29 @@ export function Footer() {
                     />
                     <button
                       type="submit"
-                      disabled={submitting}
+                      disabled={submitting || !gdprConsent}
                       aria-label="Prijavi se na e-novice"
                       className="px-4 py-2 bg-[#2F5D46] hover:bg-[#A97A24] text-white rounded-lg transition-colors flex items-center gap-2 text-sm disabled:opacity-60"
                     >
                       <Send className="w-4 h-4" aria-hidden />
                     </button>
                   </div>
+                  <label className="flex items-start gap-2 text-xs text-white/70 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={gdprConsent}
+                      onChange={(e) => setGdprConsent(e.target.checked)}
+                      disabled={submitting}
+                      className="mt-0.5 shrink-0 rounded border-white/30"
+                    />
+                    <span>
+                      Strinjam se z obdelavo e-poštnega naslova za e-novice (
+                      <Link to="/zasebnost" className="underline hover:text-white">
+                        politika zasebnosti
+                      </Link>
+                      ).
+                    </span>
+                  </label>
                   {error && <p className="text-xs text-red-200">{error}</p>}
                 </form>
               )}
@@ -58,15 +79,15 @@ export function Footer() {
             <h3 className="text-lg mb-4">Kontakt</h3>
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-white/80">
-                <Mail className="w-4 h-4" />
+                <Mail className="w-4 h-4" aria-hidden />
                 <span>info@nazarje-dogodki.si</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-white/80">
-                <Phone className="w-4 h-4" />
+                <Phone className="w-4 h-4" aria-hidden />
                 <span>+386 3 839 1600</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-white/80">
-                <MapPin className="w-4 h-4" />
+                <MapPin className="w-4 h-4" aria-hidden />
                 <span>Nazarje, Slovenija</span>
               </div>
             </div>
@@ -75,20 +96,30 @@ export function Footer() {
           <div>
             <h3 className="text-lg mb-4">Povezave</h3>
             <div className="space-y-2">
+              {facebookUrl && (
+                <a
+                  href={facebookUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-sm text-white/80 hover:text-white transition-colors"
+                >
+                  Facebook
+                </a>
+              )}
+              {instagramUrl && (
+                <a
+                  href={instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-sm text-white/80 hover:text-white transition-colors"
+                >
+                  Instagram
+                </a>
+              )}
               <a
-                href="#"
-                className="block text-sm text-white/80 hover:text-white transition-colors"
-              >
-                Facebook
-              </a>
-              <a
-                href="#"
-                className="block text-sm text-white/80 hover:text-white transition-colors"
-              >
-                Instagram
-              </a>
-              <a
-                href="#"
+                href={obcinaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="block text-sm text-white/80 hover:text-white transition-colors"
               >
                 Občina Nazarje

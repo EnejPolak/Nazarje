@@ -12,6 +12,9 @@ import { SkipLink } from '../components/public/layout/skip-link';
 import { useEventDetail } from '../hooks/use-event-detail';
 import { usePageMeta } from '../hooks/use-page-meta';
 import { formatSlovenianDate } from '../utils/event-date';
+import { absoluteUrl, getOgDefaultImage } from '../utils/site-config';
+import { eventDetailPath } from '../utils/event-path';
+import { EventOrganizerCard } from '../components/public/event-detail/event-organizer-card';
 import '../styles/components/event-detail.css';
 
 export function EventDetail() {
@@ -25,11 +28,14 @@ export function EventDetail() {
       ? {
           title: `${event.title} · Nazarje Dogodki`,
           description: event.description,
-          canonicalUrl: typeof window !== 'undefined' ? window.location.href : undefined,
+          canonicalUrl: absoluteUrl(eventDetailPath(event)),
+          ogImage: event.imageUrl || getOgDefaultImage(),
+          ogType: 'article',
         }
       : {
           title: 'Dogodek · Nazarje Dogodki',
           description: 'Podrobnosti dogodka v Nazarjah.',
+          noindex: true,
         }
   );
 
@@ -120,6 +126,7 @@ export function EventDetail() {
             </div>
 
             <aside className="event-detail-sidebar">
+              <EventOrganizerCard event={event} />
               <EventLocationCard event={event} />
               <EventShareCard
                 copied={copied}

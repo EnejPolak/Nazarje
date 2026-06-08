@@ -140,6 +140,9 @@ export function CrmEventForm() {
   const [cardFilter, setCardFilter] = useState<string>('Kultura');
   const [location, setLocation] = useState('');
   const [locationMapUrl, setLocationMapUrl] = useState('');
+  const [organizerName, setOrganizerName] = useState('');
+  const [organizerEmail, setOrganizerEmail] = useState('');
+  const [organizerPhone, setOrganizerPhone] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
@@ -176,6 +179,9 @@ export function CrmEventForm() {
         setCardFilter(cardFilterFromEvent(existing));
         setLocation(existing.location);
         setLocationMapUrl(existing.locationMapUrl ?? '');
+        setOrganizerName(existing.organizerName ?? '');
+        setOrganizerEmail(existing.organizerEmail ?? '');
+        setOrganizerPhone(existing.organizerPhone ?? '');
         setImageUrl(existing.imageUrl ?? '');
         setSelectedImageFile(null);
         setLocalPreviewUrl((prev) => {
@@ -319,6 +325,9 @@ export function CrmEventForm() {
       secondaryFilter: filterFields.secondaryFilter,
       location: location.trim(),
       locationMapUrl: locationMapUrl.trim() || DEFAULT_MAP_EMBED,
+      organizerName: organizerName.trim() || undefined,
+      organizerEmail: organizerEmail.trim() || undefined,
+      organizerPhone: organizerPhone.trim() || undefined,
       isImportant: filterFields.isImportant,
       imageUrl: finalImageUrl ?? (imageUrl.trim() || undefined),
       attachments,
@@ -563,6 +572,40 @@ export function CrmEventForm() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                   placeholder="npr. Osrednji trg, Nazarje"
+                  className="crm-event-form__input"
+                />
+              </Field>
+            </FormGroup>
+
+            <FormDivider />
+
+            <FormGroup id="crm-event-organizer" title="Organizator" description="Opcijsko — prikaže se na javni strani dogodka.">
+              <Field label="Ime organizatorja" htmlFor="event-organizer-name">
+                <input
+                  id="event-organizer-name"
+                  value={organizerName}
+                  onChange={(e) => setOrganizerName(e.target.value)}
+                  placeholder="npr. KD Nazarje"
+                  className="crm-event-form__input"
+                />
+              </Field>
+              <Field label="E-pošta organizatorja" htmlFor="event-organizer-email">
+                <input
+                  id="event-organizer-email"
+                  type="email"
+                  value={organizerEmail}
+                  onChange={(e) => setOrganizerEmail(e.target.value)}
+                  placeholder="kontakt@primer.si"
+                  className="crm-event-form__input"
+                />
+              </Field>
+              <Field label="Telefon organizatorja" htmlFor="event-organizer-phone">
+                <input
+                  id="event-organizer-phone"
+                  type="tel"
+                  value={organizerPhone}
+                  onChange={(e) => setOrganizerPhone(e.target.value)}
+                  placeholder="+386 ..."
                   className="crm-event-form__input"
                 />
               </Field>

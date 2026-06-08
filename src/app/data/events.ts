@@ -18,6 +18,9 @@ export interface EventData {
   /** false = osnutek, skrit na javni strani */
   published?: boolean;
   slug?: string;
+  organizerName?: string;
+  organizerEmail?: string;
+  organizerPhone?: string;
 }
 
 /** Barva značke filtra / kategorije (kartica, podrobnosti). */

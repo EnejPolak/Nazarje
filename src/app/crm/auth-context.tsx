@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { adminLogin } from '../api/admin';
-import { ApiError } from '../api/client';
+import { ApiError, clearAdminSession } from '../api/client';
 import type { ApiAdminUser } from '../api/types';
 
 const TOKEN_KEY = 'admin_token';
@@ -57,8 +57,7 @@ export function CrmAuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    clearAdminSession();
     setIsAuthenticated(false);
     setUser(null);
   }, []);

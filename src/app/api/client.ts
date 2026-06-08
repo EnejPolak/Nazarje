@@ -27,12 +27,29 @@ export function useMockData(): boolean {
 }
 
 const ADMIN_TOKEN_KEY = 'admin_token';
+const ADMIN_USER_KEY = 'admin_user';
 
 export function getAdminToken(): string | null {
   try {
     return localStorage.getItem(ADMIN_TOKEN_KEY);
   } catch {
     return null;
+  }
+}
+
+export function clearAdminSession(): void {
+  try {
+    localStorage.removeItem(ADMIN_TOKEN_KEY);
+    localStorage.removeItem(ADMIN_USER_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function handleAdminUnauthorized(): void {
+  clearAdminSession();
+  if (typeof window !== 'undefined' && window.location.pathname !== '/admin') {
+    window.location.href = '/admin';
   }
 }
 
@@ -88,6 +105,9 @@ export async function apiFetch<T>(
       msg = payload?.error ?? payload?.message ?? 'Endpoint ni najden (404).';
     } else if (res.status === 401) {
       msg = payload?.error ?? payload?.message ?? 'Ni prijavljen ali je seja potekla. Ponovno se prijavite.';
+      if (adminAuth) {
+        handleAdminUnauthorized();
+      }
     }
     throw new ApiError(msg, res.status, payload);
   }

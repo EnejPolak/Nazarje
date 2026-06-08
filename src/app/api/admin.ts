@@ -1,4 +1,4 @@
-import { ApiError, apiFetch, getAdminToken, getApiBaseUrl } from './client';
+import { ApiError, apiFetch, getAdminToken, getApiBaseUrl, handleAdminUnauthorized } from './client';
 import { mapApiEventToEventData, mapEventDataToApiPayload } from './mappers';
 import type { ApiAdminUser, ApiEventListItem } from './types';
 import type { EventData } from '../data/events';
@@ -54,6 +54,10 @@ export async function uploadEventImage(file: File): Promise<string> {
     payload = JSON.parse(text) as UploadImagePayload;
   } catch {
     throw new ApiError('Neveljaven JSON odgovor strežnika.', res.status, text);
+  }
+
+  if (res.status === 401) {
+    handleAdminUnauthorized();
   }
 
   if (!res.ok || !payload.success) {
@@ -120,6 +124,10 @@ export async function uploadEventDocument(file: File): Promise<UploadDocumentRes
     payload = JSON.parse(text) as UploadDocumentPayload;
   } catch {
     throw new ApiError('Neveljaven JSON odgovor strežnika.', res.status, text);
+  }
+
+  if (res.status === 401) {
+    handleAdminUnauthorized();
   }
 
   if (!res.ok || !payload.success) {
@@ -206,12 +214,25 @@ export async function adminCreateEvent(event: EventData): Promise<EventData> {
 }
 
 export async function adminUpdateEvent(event: EventData): Promise<EventData> {
-  const row = await apiFetch<ApiEventListItem>('/admin/event.php', {
-    method: 'PUT',
-    adminAuth: true,
-    json: mapEventDataToApiPayload(event),
-  });
-  return mapApiEventToEventData(row);
+  const payload = mapEventDataToApiPayload(event);
+  try {
+    const row = await apiFetch<ApiEventListItem>('/admin/event.php', {
+      method: 'PUT',
+      adminAuth: true,
+      json: payload,
+    });
+    return mapApiEventToEventData(row);
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 405) {
+      const row = await apiFetch<ApiEventListItem>('/admin/event.php', {
+        method: 'PATCH',
+        adminAuth: true,
+        json: payload,
+      });
+      return mapApiEventToEventData(row);
+    }
+    throw e;
+  }
 }
 
 export async function adminDeleteEvent(id: string): Promise<void> {
