@@ -1,5 +1,4 @@
 import {
-  AlertTriangle,
   ArrowLeft,
   Calendar,
   Clock,
@@ -17,13 +16,10 @@ interface EventDetailPreviewProps {
   time: string;
   timeEnd?: string;
   longDescription: string;
-  category: string;
-  secondaryFilter?: string;
-  isImportant: boolean;
+  cardFilter: string;
   imageUrl?: string;
   location: string;
-  attachName?: string;
-  attachUrl?: string;
+  attachments?: { name: string; url?: string }[];
 }
 
 function formatDateRange(date: Date | null, dateEnd: Date | null) {
@@ -55,17 +51,14 @@ export function EventDetailPreview(props: EventDetailPreviewProps) {
     time,
     timeEnd,
     longDescription,
-    category,
-    secondaryFilter,
-    isImportant,
+    cardFilter,
     imageUrl,
     location,
-    attachName,
-    attachUrl,
+    attachments = [],
   } = props;
 
   const timeText = timeEnd?.trim() ? `${time} – ${timeEnd}` : time;
-  const hasAttachment = Boolean(attachName?.trim() && attachUrl?.trim());
+  const visibleAttachments = attachments.filter((a) => a.name.trim());
 
   return (
     <div className="bg-[#F7F4EE] rounded-xl overflow-hidden text-[#18201B] text-[13px]">
@@ -93,23 +86,10 @@ export function EventDetailPreview(props: EventDetailPreviewProps) {
         <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
           <span
             className="px-2.5 py-0.5 rounded-full text-[11px] text-white"
-            style={{ backgroundColor: categoryColorHex(category) }}
+            style={{ backgroundColor: categoryColorHex(cardFilter) }}
           >
-            {category}
+            {cardFilter}
           </span>
-          {isImportant && (
-            <span
-              className="px-2.5 py-0.5 rounded-full text-[11px] text-white inline-flex items-center gap-1"
-              style={{
-                backgroundColor: secondaryFilter
-                  ? categoryColorHex(secondaryFilter)
-                  : '#9B3A32',
-              }}
-            >
-              {!secondaryFilter && <AlertTriangle className="size-2.5" />}
-              {secondaryFilter || 'Nujno'}
-            </span>
-          )}
         </div>
       </div>
 
@@ -169,17 +149,26 @@ export function EventDetailPreview(props: EventDetailPreviewProps) {
           )}
         </div>
 
-        {/* Attachment */}
-        {hasAttachment && (
-          <div className="bg-white rounded-xl border border-[#1E3A2F]/8 p-3 flex items-center gap-3">
-            <div className="size-8 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
-              <FileText className="size-4 text-red-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium truncate">{attachName}</p>
-              <p className="text-[10px] text-[#18201B]/40">Priponka</p>
-            </div>
-            <Download className="size-3.5 text-[#18201B]/35 shrink-0" />
+        {/* Attachments */}
+        {visibleAttachments.length > 0 && (
+          <div className="bg-white rounded-xl border border-[#1E3A2F]/8 p-3 space-y-2">
+            <p className="text-[11px] text-[#18201B]/50 uppercase tracking-wider">
+              Priponke ({visibleAttachments.length})
+            </p>
+            <ul className="space-y-2">
+              {visibleAttachments.map((a, i) => (
+                <li key={`${a.name}-${i}`} className="flex items-center gap-3">
+                  <div className="size-8 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
+                    <FileText className="size-4 text-red-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-medium truncate">{a.name}</p>
+                    <p className="text-[10px] text-[#18201B]/40">PDF</p>
+                  </div>
+                  <Download className="size-3.5 text-[#18201B]/35 shrink-0" />
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 

@@ -4,10 +4,11 @@ export type NewsletterSource = 'home' | 'footer' | 'website';
 
 export async function subscribeNewsletter(
   email: string,
-  source: NewsletterSource = 'website'
+  source: NewsletterSource = 'website',
+  gdprConsent = true
 ): Promise<void> {
   await apiFetch<unknown>('/newsletter-subscribe.php', {
     method: 'POST',
-    json: { email: email.trim(), source },
+    json: { email: email.trim(), source, gdpr_consent: gdprConsent },
   });
 }

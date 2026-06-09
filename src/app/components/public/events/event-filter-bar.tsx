@@ -2,6 +2,8 @@ import React from 'react';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { categoryColorHex } from '../../../data/events';
 import type { EventSortOption } from '../../../hooks/use-event-listing';
+import { useScrollHideOnDown } from '../../../hooks/use-scroll-hide-on-down';
+import { useIsMobile } from '../../ui/use-mobile';
 import '../../../styles/components/event-listing.css';
 
 export interface EventSortOptionItem {
@@ -20,6 +22,8 @@ interface EventFilterBarProps {
   sortOptions: EventSortOptionItem[];
   hasFilters: boolean;
   onClearFilters: () => void;
+  monthFilter?: string | null;
+  onMonthFilterChange?: (value: string | null) => void;
   showImportantOnly?: boolean;
   onImportantToggle?: () => void;
   colorCategories?: boolean;
@@ -36,25 +40,43 @@ export function EventFilterBar({
   sortOptions,
   hasFilters,
   onClearFilters,
+  monthFilter = null,
+  onMonthFilterChange,
   showImportantOnly = false,
   onImportantToggle,
   colorCategories = false,
 }: EventFilterBarProps) {
+  const searchId = 'event-listing-search';
+  const sortId = 'event-listing-sort';
+  const isMobile = useIsMobile();
+  const filterHidden = useScrollHideOnDown(isMobile);
+
   return (
-    <div className="event-listing-filter">
+    <div
+      className={`event-listing-filter${filterHidden ? ' event-listing-filter--hidden' : ''}`}
+      role="search"
+      aria-label="Iskanje in filtri dogodkov"
+      aria-hidden={filterHidden}
+    >
       <div className="event-listing-filter__inner">
         <div className="event-listing-filter__search">
-          <Search className="event-listing-filter__search-icon" />
+          <Search className="event-listing-filter__search-icon" aria-hidden />
+          <label htmlFor={searchId} className="sr-only">
+            Išči dogodke po naslovu ali lokaciji
+          </label>
           <input
-            type="text"
+            id={searchId}
+            type="search"
             placeholder="Iščite po naslovu, lokaciji…"
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
             className="event-listing-filter__input"
+            autoComplete="off"
           />
         </div>
 
-        <div className="event-listing-filter__categories">
+        <fieldset className="event-listing-filter__categories border-0 m-0 p-0 min-w-0">
+          <legend className="sr-only">Filtri po kategoriji</legend>
           {categories.map((category) => {
             const isActive = activeCategory === category;
             const color = categoryColorHex(category);
@@ -62,8 +84,10 @@ export function EventFilterBar({
             return (
               <button
                 key={category}
+                type="button"
                 onClick={() => onCategoryChange(isActive ? null : category)}
-                className={`px-3 py-1 rounded-full text-xs border transition-all ${
+                aria-pressed={isActive}
+                className={`event-filter-btn px-3 py-1 rounded-full text-xs border transition-all ${
                   colorCategories
                     ? ''
                     : isActive
@@ -87,21 +111,40 @@ export function EventFilterBar({
 
           {onImportantToggle && (
             <button
+              type="button"
               onClick={onImportantToggle}
-              className={`px-3 py-1 rounded-full text-xs border transition-all ${
+              aria-pressed={showImportantOnly}
+              className={`event-filter-btn px-3 py-1 rounded-full text-xs border transition-all ${
                 showImportantOnly
                   ? 'bg-[#9B3A32] text-white border-[#9B3A32]'
                   : 'bg-[#FDF0EE] text-[#9B3A32] border-[#9B3A32]'
               }`}
             >
-              ⚠ Nujni
+              <span aria-hidden>⚠ </span>
+              Nujni
             </button>
           )}
-        </div>
+        </fieldset>
 
         <div className="event-listing-filter__actions">
-          <SlidersHorizontal className="w-4 h-4 text-[#18201B]/30" />
+          {onMonthFilterChange && (
+            <label className="event-listing-filter__month" htmlFor="event-listing-month">
+              <span className="event-listing-filter__month-text">Mesec</span>
+              <input
+                id="event-listing-month"
+                type="month"
+                value={monthFilter ?? ''}
+                onChange={(e) => onMonthFilterChange(e.target.value || null)}
+                className="event-listing-filter__month-input"
+              />
+            </label>
+          )}
+          <SlidersHorizontal className="w-4 h-4 text-[#18201B]/30" aria-hidden />
+          <label htmlFor={sortId} className="sr-only">
+            Razvrsti dogodke
+          </label>
           <select
+            id={sortId}
             value={sortBy}
             onChange={(event) => onSortChange(event.target.value as EventSortOption)}
             className="event-listing-filter__select"
@@ -114,12 +157,9 @@ export function EventFilterBar({
           </select>
 
           {hasFilters && (
-            <button
-              onClick={onClearFilters}
-              className="event-listing-filter__clear"
-            >
-              <X className="w-3.5 h-3.5" />
-              Počisti
+            <button type="button" onClick={onClearFilters} className="event-listing-filter__clear">
+              <X className="w-3.5 h-3.5" aria-hidden />
+              Počisti filtre
             </button>
           )}
         </div>

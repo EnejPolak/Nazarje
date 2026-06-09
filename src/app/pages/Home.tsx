@@ -5,11 +5,19 @@ import { Header } from '../components/public/layout/header';
 import { Hero } from '../components/public/home/hero';
 import { EventCalendar, CalendarEvent } from '../components/public/events/event-calendar';
 import { EventCard } from '../components/public/events/event-card';
+import { EventCardsMobileCarousel } from '../components/public/events/event-cards-mobile-carousel';
+import { useIsMobile } from '../components/ui/use-mobile';
 import { EventsError, EventsLoading } from '../components/public/events/events-loading';
 import { Footer } from '../components/public/layout/footer';
+import { FallingLeaves } from '../components/Falling-leaves';
+import { TreesBackground } from '../components/Three-background';
 import { usePublishedEvents } from '../hooks/use-published-events';
-import { useNewsletterForm } from '../hooks/use-newsletter-form';
+import { usePageMeta, PAGE_META_DEFAULTS } from '../hooks/use-page-meta';
+import { SkipLink } from '../components/public/layout/skip-link';
+import { eventDetailPath } from '../utils/event-path';
+// import { useNewsletterForm } from '../hooks/use-newsletter-form';
 import '../styles/components/home.css';
+import '../styles/components/event-listing.css';
 
 const fadeUpInView = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -19,9 +27,13 @@ const fadeUpInView = (delay = 0) => ({
 });
 
 export function Home() {
+  usePageMeta(PAGE_META_DEFAULTS.home);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const { events, loading, error, refetch } = usePublishedEvents();
-  const newsletter = useNewsletterForm('home');
+
+  const eventsById = useMemo(() => new Map(events.map((e) => [e.id, e])), [events]);
+  // const newsletter = useNewsletterForm('home');
 
   const upcomingEvents = useMemo(() => {
     const t = new Date();
@@ -43,30 +55,47 @@ export function Home() {
   }));
 
   return (
-    <div className="min-h-screen bg-[#F7F4EE]">
+    <div className="min-h-screen bg-[#F7F4EE] flex flex-col">
+      <SkipLink />
       <Header />
 
+      <main id="main-content">
       <Hero />
 
-      <section id="koledar" className="home-calendar-section">
-        <div className="home-calendar-section__container">
-          {loading ? (
-            <EventsLoading label="Nalagam koledar…" />
-          ) : error ? (
-            <EventsError message={error} onRetry={refetch} />
-          ) : (
-            <EventCalendar
-              events={calendarEvents}
-              onEventClick={(id) => navigate(`/event/${id}`)}
-            />
-          )}
+      <div className="home-after-hero">
+        <div className="home-leaves-zone">
+          <FallingLeaves />
         </div>
-      </section>
 
-      <section id="dogodki" className="py-16 bg-[#EAF1EA]">
-        <div className="max-w-7xl mx-auto px-6">
+        <section id="koledar" className="home-calendar-section" aria-labelledby="calendar-section-heading">
+          <h2 id="calendar-section-heading" className="sr-only">
+            Koledar dogodkov
+          </h2>
+          <div className="home-calendar-section__container">
+            {loading ? (
+              <EventsLoading label="Nalagam koledar…" />
+            ) : error ? (
+              <EventsError message={error} onRetry={refetch} />
+            ) : (
+              <EventCalendar
+                events={calendarEvents}
+                onEventClick={(id) => {
+                  const ev = eventsById.get(id);
+                  navigate(ev ? eventDetailPath(ev) : `/event/${id}`);
+                }}
+              />
+            )}
+          </div>
+        </section>
+
+        <div className="home-below-hero">
+        <TreesBackground />
+
+        <div className="home-below-hero__content">
+        <section id="dogodki" className="py-16 bg-transparent" aria-labelledby="upcoming-events-heading">
+          <div className="max-w-7xl mx-auto px-6">
           <motion.div {...fadeUpInView(0)} className="text-center mb-12">
-            <h2 className="text-3xl text-[#18201B] mb-4">Prihajajoči dogodki</h2>
+            <h2 id="upcoming-events-heading" className="text-3xl text-[#18201B] mb-4">Prihajajoči dogodki</h2>
             <p className="text-[#18201B]/70 max-w-2xl mx-auto">Kliknite na kartico za vse podrobnosti</p>
           </motion.div>
 
@@ -74,14 +103,25 @@ export function Home() {
             <EventsLoading />
           ) : error ? (
             <EventsError message={error} onRetry={refetch} />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          ) : isMobile ? (
+            <EventCardsMobileCarousel ariaLabel="Prihajajoči dogodki">
               {upcomingEvents.slice(0, 6).map((event, i) => (
                 <EventCard
                   key={event.id}
                   event={event}
                   index={i}
-                  onClick={() => navigate(`/event/${event.id}`)}
+                  onClick={() => navigate(eventDetailPath(event))}
+                />
+              ))}
+            </EventCardsMobileCarousel>
+          ) : (
+            <div className="event-listing-results__grid">
+              {upcomingEvents.slice(0, 6).map((event, i) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  index={i}
+                  onClick={() => navigate(eventDetailPath(event))}
                 />
               ))}
             </div>
@@ -89,16 +129,16 @@ export function Home() {
 
           <motion.div
             {...fadeUpInView(0.1)}
-            className="flex flex-wrap justify-center gap-3 mt-10"
+            className="grid grid-cols-2 gap-2 sm:gap-3 mt-10 max-w-xl mx-auto"
           >
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => navigate('/events')}
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-[#2F5D46] hover:bg-[#1E3A2F] text-white rounded-xl transition-colors shadow-sm"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-7 py-3 sm:py-3.5 bg-[#2F5D46] hover:bg-[#1E3A2F] text-white rounded-xl transition-colors shadow-sm min-w-0"
             >
-              <span className="text-sm tracking-wide">Vsi dogodki</span>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <span className="text-xs sm:text-sm tracking-wide">Vsi dogodki</span>
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </motion.button>
@@ -106,18 +146,19 @@ export function Home() {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => navigate('/past-events')}
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-white hover:bg-[#F7F4EE] text-[#18201B]/70 hover:text-[#18201B] border border-[#1E3A2F]/15 rounded-xl transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 sm:gap-2.5 px-3 sm:px-7 py-3 sm:py-3.5 bg-white hover:bg-[#F7F4EE] text-[#18201B]/70 hover:text-[#18201B] border border-[#1E3A2F]/15 rounded-xl transition-colors min-w-0"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-sm tracking-wide">Pretekli dogodki</span>
+              <span className="text-xs sm:text-sm tracking-wide">Pretekli dogodki</span>
             </motion.button>
           </motion.div>
         </div>
       </section>
 
-      <section className="py-14 bg-[#F7F4EE]">
+      {/* E-novice — začasno skrito na domači strani
+      <section className="py-14 bg-transparent">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             {...fadeUpInView(0)}
@@ -177,6 +218,11 @@ export function Home() {
           </motion.div>
         </div>
       </section>
+      */}
+        </div>
+        </div>
+      </div>
+      </main>
 
       <Footer />
     </div>

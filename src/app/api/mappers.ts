@@ -42,6 +42,9 @@ export function mapApiEventToEventData(row: ApiEventListItem): EventData {
     attachments: mapAttachments(row.attachments),
     published: row.published !== undefined ? toBool(row.published) : true,
     slug: row.slug ?? undefined,
+    organizerName: row.organizer_name?.trim() || undefined,
+    organizerEmail: row.organizer_email?.trim() || undefined,
+    organizerPhone: row.organizer_phone?.trim() || undefined,
   };
 }
 
@@ -70,6 +73,9 @@ export function mapEventDataToApiPayload(event: EventData): Record<string, unkno
     location_map_url: event.locationMapUrl,
     published: event.published === false ? 0 : 1,
     slug: event.slug?.trim() || null,
+    organizer_name: event.organizerName?.trim() || null,
+    organizer_email: event.organizerEmail?.trim() || null,
+    organizer_phone: event.organizerPhone?.trim() || null,
     attachments: (event.attachments ?? []).map((a, i) => ({
       name: a.name,
       url: a.url,

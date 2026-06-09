@@ -34,10 +34,10 @@ const PAGE_COPY: Record<
     emptyText: 'Ko bo datum dogodka pretekel, se bo prikazal tukaj.',
   },
   published: {
-    title: 'Objavljeni dogodki',
-    subtitle: 'Dogodki, ki so vidni na javni strani.',
-    emptyTitle: 'Ni objavljenih dogodkov',
-    emptyText: 'Objavi dogodek v obrazcu ali preveri filtre v bazi.',
+    title: 'Prihajajoči dogodki',
+    subtitle: 'Prihajajoči dogodki vključno z osnutki.',
+    emptyTitle: 'Ni prihajajočih dogodkov',
+    emptyText: 'Ustvari nov dogodek v obrazcu.',
   },
 };
 
@@ -86,6 +86,8 @@ export function CrmEventList() {
               event={event}
               index={index}
               ctaLabel="Uredi"
+              showPublishStatus
+              published={event.published !== false}
               onClick={() =>
                 navigate(`/admin/dashboard/uredi/${event.id}`, {
                   state: { from: listPath },

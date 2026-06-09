@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import { Calendar, Clock, ChevronRight, Paperclip } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageWithFallback } from '../../figma/ImageWithFallback';
@@ -26,6 +27,9 @@ interface EventCardProps {
   index?: number;
   /** Besedilo gumba (privzeto: Preberi več) */
   ctaLabel?: string;
+  /** CRM: prikaži badge Objavljeno / Osnutek */
+  showPublishStatus?: boolean;
+  published?: boolean;
 }
 
 function truncateWords(text: string, maxWords: number) {
@@ -44,68 +48,101 @@ export function EventCard({
   grayscale,
   index = 0,
   ctaLabel = 'Preberi več',
+  showPublishStatus = false,
+  published = true,
 }: EventCardProps) {
+  const dateLabel = formatCompactSlovenianDateRange(event.date, event.dateEnd);
+  const cardLabel = `${event.title}. ${dateLabel}, ${event.time}. Kategorija: ${event.category}. ${ctaLabel}.`;
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
-    <motion.div
+    <motion.article
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-40px' }}
-      transition={{ duration: 0.45, delay: (index % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.45, delay: (index % 3) * 0.1, ease: [0.22, 1, 0.36, 1] as const }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      className="event-card event-card-ticket group"
+      className="event-card group"
+      role="button"
+      tabIndex={0}
+      aria-label={cardLabel}
       onClick={onClick}
+      onKeyDown={handleKeyDown}
     >
       {event.imageUrl && (
         <div className="event-card__image-wrap">
           <div className="event-card__image-motion">
             <ImageWithFallback
               src={event.imageUrl}
-              alt={event.title}
+              alt=""
+              aria-hidden
               className={`event-card__image ${grayscale ? 'grayscale group-hover:grayscale-0' : ''}`}
             />
           </div>
         </div>
       )}
       <div className="event-card__body">
-        <span
-          className={`event-card__badge ${categoryBadgeBgClass(event.category)}`}
-        >
-          {event.category}
-        </span>
-
-        <div>
-          <h3 className="event-card__title">
-            {event.title}
-          </h3>
+        <div className="flex flex-wrap gap-1.5 mb-1">
+          {showPublishStatus && (
+            <span
+              className={`event-card__badge ${
+                published === false
+                  ? 'bg-[#18201B]/10 text-[#18201B]/70'
+                  : 'bg-[#EAF1EA] text-[#2F5D46]'
+              }`}
+            >
+              {published === false ? 'Osnutek' : 'Objavljeno'}
+            </span>
+          )}
+          <span
+            className={`event-card__badge ${categoryBadgeBgClass(event.category)}`}
+          >
+            {event.category}
+          </span>
         </div>
 
-        <div className="event-card__meta">
-          <div className="event-card__meta-item">
-            <Calendar />
-            <span>{formatCompactSlovenianDateRange(event.date, event.dateEnd)}</span>
-          </div>
-          <div className="event-card__meta-item">
-            <Clock />
-            <span>{event.time}</span>
-          </div>
-        </div>
+        <h3 className="event-card__title">{event.title}</h3>
 
-        <p className="event-card__description">
-          {truncateWords(event.description, 5)}
-        </p>
+        <ul className="event-card__meta" aria-label="Podatki o terminu">
+          <li className="event-card__meta-item">
+            <Calendar aria-hidden />
+            <span>
+              <span className="sr-only">Datum: </span>
+              {dateLabel}
+            </span>
+          </li>
+          <li className="event-card__meta-item">
+            <Clock aria-hidden />
+            <span>
+              <span className="sr-only">Ura: </span>
+              {event.time}
+            </span>
+          </li>
+        </ul>
+
+        <p className="event-card__description">{truncateWords(event.description, 5)}</p>
 
         {event.attachments && event.attachments.length > 0 && (
           <div className="event-card__attachments">
-            <Paperclip />
-            <span>{event.attachments.length} {event.attachments.length === 1 ? 'priponka' : 'priponki'}</span>
+            <Paperclip aria-hidden />
+            <span>
+              {event.attachments.length}{' '}
+              {event.attachments.length === 1 ? 'priponka' : 'priponki'}
+            </span>
           </div>
         )}
 
-        <button type="button" className="event-card__button">
+        <span className="event-card__button" aria-hidden>
           {ctaLabel}
-          <ChevronRight className="event-card__button-icon" />
-        </button>
+          <ChevronRight className="event-card__button-icon" aria-hidden />
+        </span>
       </div>
-    </motion.div>
+    </motion.article>
   );
 }

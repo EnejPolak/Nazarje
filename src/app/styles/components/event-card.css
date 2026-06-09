@@ -1,54 +1,37 @@
 .event-card {
+  --event-card-radius: var(--event-surface-radius, 1rem);
   position: relative;
-  max-width: 22rem;
-  margin: 0 auto;
-  background: #fff;
-  border: 1px solid rgb(30 58 47 / 0.08);
-  border-radius: 1.375rem;
-  box-shadow: none;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.52);
+  border: 1px solid rgb(255 255 255 / 0.55);
+  border-radius: var(--event-card-radius);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   cursor: pointer;
+  outline: none;
   transition:
+    background 200ms ease,
     box-shadow 200ms ease,
+    border-color 200ms ease,
     transform 200ms ease;
 }
 
-.event-card-ticket {
-  position: relative;
-  overflow: visible;
-  --event-card-cutout-bg: #F7F4EE;
-}
-
-#dogodki .event-card-ticket {
-  --event-card-cutout-bg: #EAF1EA;
-}
-
-.event-card-ticket::before,
-.event-card-ticket::after {
-  content: '';
-  position: absolute;
-  top: 65%;
-  z-index: 3;
-  width: clamp(1.5rem, 4vw, 2rem);
-  height: clamp(1.5rem, 4vw, 2rem);
-  background: var(--event-card-cutout-bg);
-  border-radius: 50%;
-  pointer-events: none;
-  transform: translateY(-50%);
-}
-
-.event-card-ticket::before {
-  left: calc(clamp(1.5rem, 4vw, 2rem) / -2);
-}
-
-.event-card-ticket::after {
-  right: calc(clamp(1.5rem, 4vw, 2rem) / -2);
+.event-card:hover {
+  background: rgb(255 255 255 / 0.68);
+  border-color: rgb(255 255 255 / 0.75);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.8);
 }
 
 .event-card__image-wrap {
   position: relative;
   height: clamp(9.5rem, 14vw, 12rem);
   overflow: hidden;
-  border-radius: 1.375rem 1.375rem 0 0;
+  border-radius: var(--event-card-radius) var(--event-card-radius) 0 0;
   background: #111;
 }
 
@@ -85,6 +68,9 @@
 
 .event-card__body {
   position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 2rem 1.2rem 1.2rem;
 }
 
@@ -105,18 +91,25 @@
 }
 
 .event-card__title {
+  display: -webkit-box;
+  overflow: hidden;
+  min-height: calc(2 * 1.08em);
   margin: 0 0 0.85rem;
   color: #17211d;
   font-size: clamp(1rem, 1.5vw, 1.2rem);
   font-weight: 900;
   letter-spacing: -0.045em;
   line-height: 1.08;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .event-card__meta {
   display: grid;
   gap: 0.4rem;
-  margin-bottom: 0.85rem;
+  margin: 0 0 0.85rem;
+  padding: 0;
+  list-style: none;
 }
 
 .event-card__meta-item {
@@ -137,11 +130,16 @@
 }
 
 .event-card__description {
+  display: -webkit-box;
+  overflow: hidden;
+  min-height: calc(3 * 1.45em);
   margin: 0 0 0.95rem;
   color: #424b46;
   font-size: clamp(0.78rem, 1.05vw, 0.86rem);
   font-weight: 450;
   line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .event-card__attachments {
@@ -164,11 +162,12 @@
   display: flex;
   width: 100%;
   min-height: 2.55rem;
+  margin-top: auto;
   align-items: center;
   justify-content: center;
   gap: 0.7rem;
   border: 0;
-  border-radius: 0.75rem;
+  border-radius: var(--event-card-radius);
   background: #2F5D46;
   color: #fff;
   cursor: pointer;
@@ -197,15 +196,13 @@
   transform: translateX(0.125rem);
 }
 
-@media (max-width: 640px) {
-  .event-card {
-    max-width: none;
-    border-radius: 1.125rem;
-  }
+.event-card:not(:has(.event-card__image-wrap)) .event-card__body {
+  min-height: 18rem;
+}
 
+@media (max-width: 640px) {
   .event-card__image-wrap {
     height: 12rem;
-    border-radius: 1.125rem 1.125rem 0 0;
   }
 
   .event-card__body {
@@ -233,7 +230,6 @@
 
   .event-card__button {
     min-height: 2.65rem;
-    border-radius: 0.7rem;
     font-size: 0.84rem;
   }
 }

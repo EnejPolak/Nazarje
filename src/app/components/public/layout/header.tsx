@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { motion, AnimatePresence } from 'motion/react';
 import nazarjeGrb from 'figma:asset/2e8f7a543b609ec574e73e03452550de1d5e4577.png';
+import { MobileNav } from './mobile-nav';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,32 +36,38 @@ export function Header() {
     return (
       <button
         key={path}
+        type="button"
+        aria-current={isActive ? 'page' : undefined}
         onClick={() => handleNav(path, section)}
-        className={`relative px-4 py-2 text-sm transition-colors ${
-          isActive ? 'text-white' : 'text-white/60 hover:text-white'
+        className={`relative px-4 py-2 text-base font-medium tracking-wide transition-colors ${
+          isActive
+            ? 'text-[#1E3A2F]'
+            : 'text-[#2F5D46]/85 hover:text-[#1E3A2F]'
         }`}
       >
         {label}
         {isActive && (
-          <span className="absolute bottom-0 left-4 right-4 h-px bg-white/50 rounded-full" />
+          <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-[#2F5D46] rounded-full" />
         )}
       </button>
     );
   };
 
   return (
+    <>
     <header
+      role="banner"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         isScrolled
-          ? 'bg-white/12 backdrop-blur-xl border-b border-white/15 shadow-sm'
-          : 'bg-white/8 backdrop-blur-lg border-b border-white/10'
+          ? 'bg-[#F7F4EE]/92 backdrop-blur-xl border-b border-[#1E3A2F]/12 shadow-sm'
+          : 'bg-[#F7F4EE]/78 backdrop-blur-lg border-b border-[#1E3A2F]/10'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6">
         <div className="relative flex items-center justify-between h-16">
 
           {/* Left nav */}
-          <nav className="hidden md:flex items-center">
+          <nav className="hidden md:flex items-center" aria-label="Glavna navigacija">
             {navBtn('Domov', '/', 'domov')}
             {navBtn('Vsi dogodki', '/events')}
           </nav>
@@ -69,8 +75,9 @@ export function Header() {
           {/* Center: coat of arms in circle — absolutely centered */}
           <div className="absolute left-1/2 -translate-x-1/2">
             <button
+              type="button"
               onClick={() => handleNav('/', 'domov')}
-              aria-label="Domov"
+              aria-label="Domov — Nazarje dogodki"
               className="opacity-90 hover:opacity-100 transition-opacity"
             >
               <img
@@ -82,15 +89,18 @@ export function Header() {
           </div>
 
           {/* Right nav */}
-          <nav className="hidden md:flex items-center">
+          <nav className="hidden md:flex items-center" aria-label="Dodatna navigacija">
             {navBtn('Pretekli dogodki', '/past-events')}
           </nav>
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden flex flex-col gap-1.5 p-2 text-white/70 hover:text-white transition-colors ml-auto"
+            type="button"
+            className="md:hidden flex flex-col gap-1.5 p-2 text-[#1E3A2F] hover:text-[#2F5D46] transition-colors ml-auto"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Meni"
+            aria-label={menuOpen ? 'Zapri meni' : 'Odpri meni'}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-nav-panel"
           >
             <span className={`w-5 h-px bg-current transition-all duration-200 ${menuOpen ? 'translate-y-[7px] rotate-45' : ''}`} />
             <span className={`w-5 h-px bg-current transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
@@ -98,59 +108,18 @@ export function Header() {
           </button>
         </div>
       </div>
-
-      {/* Mobile menu - slide in from left */}
-      <AnimatePresence>
-        {menuOpen && (
-          <>
-            {/* Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 bg-black/40 md:hidden z-40"
-            />
-
-            {/* Slide-in menu */}
-            <motion.div
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-16 bottom-0 w-64 bg-[#152e23]/80 backdrop-blur-xl md:hidden z-50 shadow-2xl border-r border-white/10"
-            >
-              {/* Navigation links */}
-              <nav className="px-6 py-6 flex flex-col gap-2">
-                {[
-                  { label: 'Domov',            path: '/',            section: 'domov' },
-                  { label: 'Vsi dogodki',      path: '/events' },
-                  { label: 'Pretekli dogodki', path: '/past-events' },
-                ].map((link, idx) => {
-                  const isActive = location.pathname === link.path;
-                  return (
-                    <motion.button
-                      key={link.path}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      onClick={() => handleNav(link.path, link.section)}
-                      className={`text-left py-3 px-4 rounded-lg transition-colors ${
-                        isActive
-                          ? 'bg-white/10 text-white'
-                          : 'text-white/60 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      {link.label}
-                    </motion.button>
-                  );
-                })}
-              </nav>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </header>
+
+    <MobileNav
+      open={menuOpen}
+      onClose={() => setMenuOpen(false)}
+      onNavigate={handleNav}
+      links={[
+        { label: 'Domov', path: '/', section: 'domov' },
+        { label: 'Vsi dogodki', path: '/events' },
+        { label: 'Pretekli dogodki', path: '/past-events' },
+      ]}
+    />
+    </>
   );
 }

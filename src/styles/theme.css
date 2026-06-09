@@ -41,9 +41,17 @@
   --sidebar-accent-foreground: #18201B;
   --sidebar-border: rgba(30, 58, 47, 0.1);
   --sidebar-ring: #3D6F7A;
+  /* Breakpoints: 480 sm | 640 md | 768 lg | 1024 xl | 1280 2xl | 1536 3xl */
+  --bp-sm: 480px;
+  --bp-md: 640px;
+  --bp-lg: 768px;
+  --bp-xl: 1024px;
+  --bp-2xl: 1280px;
+  --bp-3xl: 1536px;
   --page-content-max-width: 80rem;
   --page-content-padding: 1.5rem;
   --calendar-inner-padding: 1.25rem;
+  --event-surface-radius: 1rem;
 }
 
 .dark {
@@ -194,5 +202,14 @@
   textarea,
   select {
     font-family: inherit;
+  }
+
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid #2f5d46;
+    outline-offset: 2px;
   }
 }

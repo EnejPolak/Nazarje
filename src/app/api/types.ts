@@ -30,6 +30,9 @@ export interface ApiEventListItem {
   location_map_url: string;
   published?: number | boolean;
   slug: string | null;
+  organizer_name?: string | null;
+  organizer_email?: string | null;
+  organizer_phone?: string | null;
   created_at?: string;
   updated_at?: string;
   attachments?: ApiAttachment[];

@@ -1,0 +1,47 @@
+.trees-background-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+#trees-container {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#trees {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: clamp(180px, 25vh, 320px);
+  margin-top: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.tree {
+  stroke: #3a471f;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.2px;
+  pointer-events: none;
+  display: block;
+  position: absolute;
+  bottom: -5px;
+  transform-origin: center calc(100% - 5px);
+}
+
+.tree path:not(.trunk) {
+  pointer-events: none;
+}
+
+.tree path {
+  pointer-events: visibleStroke;
+}

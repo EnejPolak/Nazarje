@@ -11,6 +11,16 @@ interface UseEventListingOptions {
   includeImportantFilter?: boolean;
 }
 
+function eventMatchesMonth(event: EventData, monthFilter: string): boolean {
+  const [year, month] = monthFilter.split('-').map(Number);
+  if (!year || !month) return true;
+  const start = new Date(year, month - 1, 1);
+  const end = new Date(year, month, 0, 23, 59, 59, 999);
+  const eventStart = new Date(event.date);
+  const eventEnd = event.dateEnd ? new Date(event.dateEnd) : eventStart;
+  return eventStart <= end && eventEnd >= start;
+}
+
 export function useEventListing({
   events,
   mode,
@@ -19,6 +29,7 @@ export function useEventListing({
 }: UseEventListingOptions) {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [monthFilter, setMonthFilter] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<EventSortOption>(initialSort);
   const [showImportantOnly, setShowImportantOnly] = useState(false);
 
@@ -55,6 +66,10 @@ export function useEventListing({
       list = list.filter((event) => event.category === activeCategory);
     }
 
+    if (monthFilter) {
+      list = list.filter((event) => eventMatchesMonth(event, monthFilter));
+    }
+
     if (includeImportantFilter && showImportantOnly) {
       list = list.filter((event) => event.isImportant);
     }
@@ -66,16 +81,17 @@ export function useEventListing({
     });
 
     return list;
-  }, [activeCategory, baseEvents, includeImportantFilter, search, showImportantOnly, sortBy]);
+  }, [activeCategory, baseEvents, includeImportantFilter, monthFilter, search, showImportantOnly, sortBy]);
 
   const clearFilters = () => {
     setSearch('');
     setActiveCategory(null);
+    setMonthFilter(null);
     setShowImportantOnly(false);
   };
 
   const hasFilters = Boolean(
-    search || activeCategory || (includeImportantFilter && showImportantOnly)
+    search || activeCategory || monthFilter || (includeImportantFilter && showImportantOnly)
   );
 
   return {
@@ -83,6 +99,8 @@ export function useEventListing({
     setSearch,
     activeCategory,
     setActiveCategory,
+    monthFilter,
+    setMonthFilter,
     sortBy,
     setSortBy,
     showImportantOnly,

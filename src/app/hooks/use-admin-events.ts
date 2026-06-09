@@ -5,13 +5,27 @@ import type { EventData } from '../data/events';
 
 export type AdminEventsMode = 'past' | 'published';
 
-function filterPastEvents(events: EventData[]): EventData[] {
+function startOfToday(): Date {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+function filterPastEvents(events: EventData[]): EventData[] {
+  const today = startOfToday();
   return events.filter((event) => {
     const date = new Date(event.date);
     date.setHours(0, 0, 0, 0);
     return date < today;
+  });
+}
+
+function filterUpcomingEvents(events: EventData[]): EventData[] {
+  const today = startOfToday();
+  return events.filter((event) => {
+    const date = new Date(event.date);
+    date.setHours(0, 0, 0, 0);
+    return date >= today;
   });
 }
 
@@ -24,14 +38,10 @@ export function useAdminEvents(mode: AdminEventsMode) {
     setLoading(true);
     setError(null);
     try {
-      let data =
-        mode === 'published'
-          ? await adminFetchEvents(true)
-          : await adminFetchEvents();
-      if (mode === 'past') {
-        data = filterPastEvents(data);
-      }
-      setEvents(data);
+      const data = await adminFetchEvents();
+      const filtered =
+        mode === 'past' ? filterPastEvents(data) : filterUpcomingEvents(data);
+      setEvents(filtered);
     } catch (e) {
       const msg =
         e instanceof ApiError

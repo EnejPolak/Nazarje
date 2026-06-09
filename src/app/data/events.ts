@@ -18,6 +18,9 @@ export interface EventData {
   /** false = osnutek, skrit na javni strani */
   published?: boolean;
   slug?: string;
+  organizerName?: string;
+  organizerEmail?: string;
+  organizerPhone?: string;
 }
 
 /** Barva značke filtra / kategorije (kartica, podrobnosti). */
@@ -28,6 +31,7 @@ export const CATEGORY_COLOR_HEX: Record<string, string> = {
   Izobraževanje: '#6B5EA8',
   Delavnica: '#6B5EA8',
   Družabno: '#2F5D46',
+  Nujno: '#9B3A32',
 };
 
 export function categoryColorHex(category: string): string {
@@ -42,6 +46,7 @@ export function categoryBadgeBgClass(category: string): string {
     Izobraževanje: 'bg-[#6B5EA8]',
     Delavnica: 'bg-[#6B5EA8]',
     Družabno: 'bg-[#2F5D46]',
+    Nujno: 'bg-[#9B3A32]',
   };
   return map[category] ?? 'bg-[#A97A24]';
 }

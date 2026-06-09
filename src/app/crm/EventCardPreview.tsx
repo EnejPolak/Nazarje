@@ -1,4 +1,4 @@
-import { Calendar, Clock, MapPin, Paperclip, ChevronRight, ImageIcon, AlertTriangle } from 'lucide-react';
+import { Calendar, Clock, MapPin, Paperclip, ChevronRight, ImageIcon } from 'lucide-react';
 import { categoryBadgeBgClass } from '../data/events';
 
 interface EventCardPreviewProps {
@@ -8,12 +8,10 @@ interface EventCardPreviewProps {
   time: string;
   timeEnd?: string;
   description: string;
-  category: string;
-  secondaryFilter?: string;
-  isImportant: boolean;
+  cardFilter: string;
   imageUrl?: string;
   location: string;
-  hasAttachment: boolean;
+  attachmentCount: number;
 }
 
 function formatDateRange(date: Date | null, dateEnd: Date | null) {
@@ -35,12 +33,10 @@ export function EventCardPreview(props: EventCardPreviewProps) {
     time,
     timeEnd,
     description,
-    category,
-    secondaryFilter,
-    isImportant,
+    cardFilter,
     imageUrl,
     location,
-    hasAttachment,
+    attachmentCount,
   } = props;
 
   const timeText = timeEnd?.trim() ? `${time} – ${timeEnd}` : time;
@@ -65,23 +61,11 @@ export function EventCardPreview(props: EventCardPreviewProps) {
           <h3 className="text-lg text-[#18201B] flex-1 min-w-0 pr-1 font-medium">
             {title || 'Naslov dogodka'}
           </h3>
-          <div className="flex flex-wrap justify-end gap-1.5 shrink-0 max-w-[55%]">
-            <span
-              className={`px-2.5 py-0.5 rounded-full text-[11px] text-white whitespace-nowrap ${categoryBadgeBgClass(category)}`}
-            >
-              {category}
-            </span>
-            {isImportant && (
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-[11px] text-white whitespace-nowrap inline-flex items-center gap-1 ${
-                  secondaryFilter ? categoryBadgeBgClass(secondaryFilter) : 'bg-[#9B3A32]'
-                }`}
-              >
-                {!secondaryFilter && <AlertTriangle className="size-3" />}
-                {secondaryFilter || 'Nujno'}
-              </span>
-            )}
-          </div>
+          <span
+            className={`px-2.5 py-0.5 rounded-full text-[11px] text-white whitespace-nowrap shrink-0 ${categoryBadgeBgClass(cardFilter)}`}
+          >
+            {cardFilter}
+          </span>
         </div>
 
         <div className="space-y-1.5 mb-3">
@@ -105,10 +89,17 @@ export function EventCardPreview(props: EventCardPreviewProps) {
           {description || 'Kratek opis bo prikazan tukaj. Vnesi ga v obrazcu na levi strani.'}
         </p>
 
-        {hasAttachment && (
+        {attachmentCount > 0 && (
           <div className="flex items-center gap-1.5 mb-3 text-[11px] text-[#3D6F7A]">
             <Paperclip className="w-3 h-3" />
-            <span>1 priponka</span>
+            <span>
+              {attachmentCount}{' '}
+              {attachmentCount === 1
+                ? 'priponka'
+                : attachmentCount === 2
+                  ? 'priponki'
+                  : 'priponk'}
+            </span>
           </div>
         )}
 

@@ -4,13 +4,17 @@ import { EventAttachments } from '../components/public/event-detail/event-attach
 import { EventDescription } from '../components/public/event-detail/event-description';
 import { EventDetailHero } from '../components/public/event-detail/event-detail-hero';
 import { EventLocationCard } from '../components/public/event-detail/event-location-card';
-import { EventMetaCard } from '../components/public/event-detail/event-meta-card';
 import { EventShareCard } from '../components/public/event-detail/event-share-card';
 import { EventsError, EventsLoading } from '../components/public/events/events-loading';
 import { Header } from '../components/public/layout/header';
 import { Footer } from '../components/public/layout/footer';
+import { SkipLink } from '../components/public/layout/skip-link';
 import { useEventDetail } from '../hooks/use-event-detail';
+import { usePageMeta } from '../hooks/use-page-meta';
 import { formatSlovenianDate } from '../utils/event-date';
+import { absoluteUrl, getOgDefaultImage } from '../utils/site-config';
+import { eventDetailPath } from '../utils/event-path';
+import { EventOrganizerCard } from '../components/public/event-detail/event-organizer-card';
 import '../styles/components/event-detail.css';
 
 export function EventDetail() {
@@ -19,11 +23,30 @@ export function EventDetail() {
   const { event, loading, error, refetch } = useEventDetail(id);
   const [copied, setCopied] = useState(false);
 
+  usePageMeta(
+    event
+      ? {
+          title: `${event.title} · Nazarje Dogodki`,
+          description: event.description,
+          canonicalUrl: absoluteUrl(eventDetailPath(event)),
+          ogImage: event.imageUrl || getOgDefaultImage(),
+          ogType: 'article',
+        }
+      : {
+          title: 'Dogodek · Nazarje Dogodki',
+          description: 'Podrobnosti dogodka v Nazarjah.',
+          noindex: true,
+        }
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#F7F4EE] flex flex-col">
+        <SkipLink />
         <Header />
-        <EventsLoading label="Nalagam dogodek…" />
+        <main id="main-content" className="flex-1">
+          <EventsLoading label="Nalagam dogodek…" />
+        </main>
         <Footer />
       </div>
     );
@@ -32,8 +55,12 @@ export function EventDetail() {
   if (error || !event) {
     return (
       <div className="min-h-screen bg-[#F7F4EE] flex flex-col items-center justify-center px-4">
+        <SkipLink />
         <Header />
-        <div className="flex-1 flex flex-col items-center justify-center py-16">
+        <main
+          id="main-content"
+          className="flex-1 flex flex-col items-center justify-center py-16 w-full"
+        >
           <p className="text-[#18201B] text-xl mb-4">
             {error ?? 'Dogodek ni bil najden.'}
           </p>
@@ -47,12 +74,13 @@ export function EventDetail() {
             </button>
           )}
           <button
+            type="button"
             onClick={() => navigate('/')}
-            className="bg-[#2F5D46] text-white px-6 py-3 rounded-lg hover:bg-[#1E3A2F] transition-colors"
+            className="event-detail-back-button max-w-xs"
           >
             Nazaj na domačo stran
           </button>
-        </div>
+        </main>
         <Footer />
       </div>
     );
@@ -86,36 +114,30 @@ export function EventDetail() {
 
   return (
     <div className="event-detail-page">
+      <SkipLink />
       <Header />
 
-      <EventDetailHero event={event} onBack={() => navigate(-1)} />
+      <main id="main-content">
+        <EventDetailHero event={event} onBack={() => navigate(-1)}>
+          <div className="event-detail-content">
+            <div className="event-detail-main">
+              <EventDescription description={event.longDescription} />
+              <EventAttachments attachments={event.attachments} />
+            </div>
 
-      <div className="event-detail-content">
-        <div>
-          <h1 className="event-detail-title">{event.title}</h1>
-
-          <EventMetaCard event={event} />
-          <EventDescription description={event.longDescription} />
-          <EventAttachments attachments={event.attachments} />
-        </div>
-
-        <div className="event-detail-sidebar">
-          <EventLocationCard event={event} />
-          <EventShareCard
-            copied={copied}
-            onFacebookShare={shareFacebook}
-            onInstagramShare={shareInstagram}
-            onCopyLink={copyLink}
-          />
-
-          <button
-            onClick={() => navigate('/')}
-            className="event-detail-back-button"
-          >
-            ← Vsi dogodki
-          </button>
-        </div>
-      </div>
+            <aside className="event-detail-sidebar">
+              <EventOrganizerCard event={event} />
+              <EventLocationCard event={event} />
+              <EventShareCard
+                copied={copied}
+                onFacebookShare={shareFacebook}
+                onInstagramShare={shareInstagram}
+                onCopyLink={copyLink}
+              />
+            </aside>
+          </div>
+        </EventDetailHero>
+      </main>
 
       <Footer />
     </div>

@@ -9,9 +9,9 @@ interface EventMetaCardProps {
 
 export function EventMetaCard({ event }: EventMetaCardProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-4 mb-8 p-5 bg-white rounded-2xl border border-[#1E3A2F]/8 shadow-sm">
+    <div className="event-detail-panel flex flex-col sm:flex-row gap-4 mb-8 p-5 bg-white border border-[#1E3A2F]/8 shadow-sm">
       <div className="flex items-start gap-3 flex-1">
-        <div className="w-9 h-9 rounded-xl bg-[#EAF1EA] flex items-center justify-center shrink-0">
+        <div className="event-detail-attachment__icon event-detail-attachment__icon--file w-9 h-9 flex items-center justify-center shrink-0">
           <Calendar className="w-4 h-4 text-[#2F5D46]" />
         </div>
         <div>
@@ -25,7 +25,7 @@ export function EventMetaCard({ event }: EventMetaCardProps) {
       </div>
       <div className="hidden sm:block w-px bg-[#1E3A2F]/8 self-stretch" />
       <div className="flex items-start gap-3 flex-1">
-        <div className="w-9 h-9 rounded-xl bg-[#EAF1EA] flex items-center justify-center shrink-0">
+        <div className="event-detail-attachment__icon event-detail-attachment__icon--file w-9 h-9 flex items-center justify-center shrink-0">
           <Clock className="w-4 h-4 text-[#2F5D46]" />
         </div>
         <div>
@@ -37,7 +37,7 @@ export function EventMetaCard({ event }: EventMetaCardProps) {
       </div>
       <div className="hidden sm:block w-px bg-[#1E3A2F]/8 self-stretch" />
       <div className="flex items-start gap-3 flex-1">
-        <div className="w-9 h-9 rounded-xl bg-[#EAF1EA] flex items-center justify-center shrink-0">
+        <div className="event-detail-attachment__icon event-detail-attachment__icon--file w-9 h-9 flex items-center justify-center shrink-0">
           <MapPin className="w-4 h-4 text-[#2F5D46]" />
         </div>
         <div>
