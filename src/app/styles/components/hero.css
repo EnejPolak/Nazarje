@@ -1,3 +1,5 @@
+/* Hero — desktop (1200px+): naslov spodaj v vrsti; ≤1200px: levo/desno nad koledarjem */
+
 .public-hero {
   position: relative;
   z-index: 1;
@@ -12,26 +14,41 @@
   overflow: hidden;
 }
 
-.public-hero__frame::before,
+.public-hero__image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+
+/* Desktop: gradient od spodaj navzgor — močnejši spodaj */
 .public-hero__frame::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 1;
   pointer-events: none;
-}
-
-.public-hero__frame::before {
-  background: url('../../assets/nazarje-slika.jpg') center 10% / cover no-repeat;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.62) 0%,
+    rgba(0, 0, 0, 0.38) 28%,
+    rgba(0, 0, 0, 0.14) 52%,
+    transparent 78%
+  );
 }
 
 .public-hero__content {
   position: absolute;
-  z-index: 1;
+  z-index: 2;
   inset: 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding-bottom: clamp(0.5rem, 1.25vw, 1rem);
+  padding-bottom: clamp(3rem, 8vh, 6rem);
   pointer-events: none;
 }
 
@@ -46,7 +63,7 @@
   font-size: 6.5rem;
   font-weight: 800;
   line-height: 1;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35), 0 4px 28px rgba(0, 0, 0, 0.2);
 }
 
 .public-hero__title-row {
@@ -62,10 +79,80 @@
   flex: 0 0 auto;
 }
 
-@media (max-width: 768px) {
-  .public-hero__title {
-    padding-inline: var(--page-content-padding);
-    font-size: clamp(1.5rem, 7cqi, 3.25rem);
+/* ≤1200px: levo/desno, tik nad koledarjem, gradient čez celo sliko */
+@media (max-width: 1199.98px) {
+  .public-hero__image {
+    filter: blur(1px);
+    transform: scale(1.03);
   }
 
+  .public-hero__frame::after {
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.58) 0%,
+      rgba(0, 0, 0, 0.36) 22%,
+      rgba(0, 0, 0, 0.2) 45%,
+      rgba(0, 0, 0, 0.1) 68%,
+      rgba(0, 0, 0, 0.04) 100%
+    );
+  }
+
+  .public-hero__content {
+    align-items: stretch;
+    padding-bottom: clamp(5.75rem, 13vh, 8.5rem);
+  }
+
+  .public-hero__title {
+    text-align: left;
+  }
+
+  .public-hero__title-row {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0.35rem;
+    white-space: normal;
+  }
+
+  .public-hero__title-row span:first-child {
+    align-self: flex-start;
+    text-align: left;
+  }
+
+  .public-hero__title-row span:last-child {
+    align-self: flex-end;
+    text-align: right;
+  }
+}
+
+@media (max-width: 768px) {
+  .public-hero__content {
+    padding-bottom: 7.25rem;
+  }
+
+  .public-hero__title {
+    font-size: clamp(2.25rem, 11cqi, 4rem);
+    line-height: 1.15;
+  }
+
+  .public-hero__title-row {
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1199.98px) {
+  .public-hero__content {
+    padding-bottom: clamp(5rem, 11vh, 7rem);
+  }
+
+  .public-hero__title {
+    font-size: 5.5rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .public-hero__title {
+    font-size: 7rem;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+  }
 }

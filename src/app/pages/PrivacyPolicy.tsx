@@ -10,10 +10,6 @@ export function PrivacyPolicy() {
 
   return (
     <LegalPageLayout title="Politika zasebnosti">
-      <p className="legal-page__notice">
-        Osnutek dokumenta — končno besedilo mora potrditi Občina Nazarje ali njena pravna služba.
-      </p>
-
       <h2>1. Upravljavec</h2>
       <p>
         Upravljavec osebnih podatkov je Občina Nazarje (kontaktne podatke objavi občina v končni

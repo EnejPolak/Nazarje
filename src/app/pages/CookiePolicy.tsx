@@ -10,10 +10,6 @@ export function CookiePolicy() {
 
   return (
     <LegalPageLayout title="Politika piškotkov">
-      <p className="legal-page__notice">
-        Osnutek dokumenta — končno besedilo mora potrditi Občina Nazarje ali njena pravna služba.
-      </p>
-
       <h2>1. Kaj so piškotki</h2>
       <p>
         Piškotki so majhne datoteke, ki jih spletna stran shrani v vašo napravo za delovanje strani
