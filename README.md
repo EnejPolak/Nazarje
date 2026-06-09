@@ -24,6 +24,8 @@ npm run dev
 
 Lokalno uporablja `.env.development` z `VITE_API_URL=/api` — klici gredo prek Vite proxyja na `api.nazarje.si` brez CORS napak.
 
+Produkcijski build na Vercelu uporablja `.env.production` (v repozitoriju) z `VITE_API_URL=https://api.nazarje.si`. Opcijsko lahko isto nastaviš še v Vercel → Settings → Environment Variables.
+
 `VITE_USE_MOCK=true` je samo za javni dev brez API-ja. **Admin CRM vedno uporablja realen API.**
 
 ## Javni API (api.nazarje.si)
