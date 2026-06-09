@@ -6,7 +6,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
 const siteUrl = (process.env.VITE_SITE_URL || 'https://dogodki.nazarje.si').replace(/\/$/, '');
-const apiUrl = (process.env.VITE_API_URL || 'https://api.nazarje.si').replace(/\/$/, '');
+
+function normalizeApiBaseUrl(raw) {
+  const url = (raw?.trim() || 'https://api.nazarje.si').replace(/\/$/, '');
+  if (!url) return 'https://api.nazarje.si';
+  if (url.startsWith('/')) return url;
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url}`;
+}
+
+const apiBaseUrl = normalizeApiBaseUrl(process.env.VITE_API_URL);
 
 const staticPaths = ['/', '/events', '/past-events', '/zasebnost', '/piskotki'];
 
@@ -26,7 +35,7 @@ function escapeXml(value) {
 
 async function fetchEvents() {
   try {
-    const res = await fetch(`${apiUrl}/events.php`, {
+    const res = await fetch(`${apiBaseUrl}/events.php`, {
       headers: { Accept: 'application/json' },
     });
     if (!res.ok) {

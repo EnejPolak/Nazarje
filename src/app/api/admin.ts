@@ -1,4 +1,5 @@
-import { ApiError, apiFetch, getAdminToken, getApiBaseUrl, handleAdminUnauthorized } from './client';
+import { apiUrl } from '@/lib/api';
+import { ApiError, apiFetch, getAdminToken, handleAdminUnauthorized } from './client';
 import { mapApiEventToEventData, mapEventDataToApiPayload } from './mappers';
 import type { ApiAdminUser, ApiEventListItem } from './types';
 import type { EventData } from '../data/events';
@@ -36,8 +37,7 @@ export async function uploadEventImage(file: File): Promise<string> {
   const formData = new FormData();
   formData.append('image', file);
 
-  const base = getApiBaseUrl();
-  const res = await fetch(`${base}/admin/upload-image.php`, {
+  const res = await fetch(apiUrl('/admin/upload-image.php'), {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -106,8 +106,7 @@ export async function uploadEventDocument(file: File): Promise<UploadDocumentRes
   const formData = new FormData();
   formData.append('document', file);
 
-  const base = getApiBaseUrl();
-  const res = await fetch(`${base}/admin/upload-document.php`, {
+  const res = await fetch(apiUrl('/admin/upload-document.php'), {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -158,8 +157,7 @@ export type AdminLoginResult = {
 };
 
 export async function adminLogin(email: string, password: string): Promise<AdminLoginResult> {
-  const base = getApiBaseUrl();
-  const res = await fetch(`${base}/admin-login.php`, {
+  const res = await fetch(apiUrl('/admin-login.php'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
