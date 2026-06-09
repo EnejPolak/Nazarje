@@ -30,4 +30,54 @@
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://dogodki.nazarje.si/event/poletni-koncert-nazarje</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dogodki.nazarje.si/event/otroska-ustvarjalna-delavnica</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dogodki.nazarje.si/event/kolesarski-dan-po-savinjski-dolini</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dogodki.nazarje.si/event/vecer-lokalne-kulinarike</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dogodki.nazarje.si/event/pohod-do-razgledne-tocke</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dogodki.nazarje.si/event/filmski-vecer-pod-zvezdami</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dogodki.nazarje.si/event/trznica-domacih-izdelkov</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dogodki.nazarje.si/event/gasilska-veselica</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dogodki.nazarje.si/event/jutranja-vadba-v-parku</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://dogodki.nazarje.si/event/predavanje-o-zgodovini-nazarij</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>

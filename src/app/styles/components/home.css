@@ -20,15 +20,15 @@
   position: relative;
   z-index: 10;
   isolation: isolate;
-  margin-top: clamp(-5.6rem, -13vh, -8.5rem);
+  margin-top: -7rem;
   padding-top: 0;
   padding-bottom: 4rem;
 }
 
-/* ≤1200px: koledar enako visoko prek hero */
-@media (max-width: 1199.98px) {
+/* 3xl+: večji overlap z hero */
+@media (min-width: var(--bp-3xl)) {
   .home-calendar-section {
-    margin-top: -7rem;
+    margin-top: clamp(-5.6rem, -13vh, -8.5rem);
   }
 }
 

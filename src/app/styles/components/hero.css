@@ -1,4 +1,4 @@
-/* Hero — desktop (1200px+): naslov spodaj v vrsti; ≤1200px: levo/desno nad koledarjem */
+/* Hero — xl+: ena vrstica, avto-wrap ko besedi ne staneta; <xl: levo/desno nad koledarjem */
 
 .public-hero {
   position: relative;
@@ -48,7 +48,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding-bottom: clamp(3rem, 8vh, 6rem);
+  padding-bottom: clamp(3.75rem, 10vh, 6.5rem);
   pointer-events: none;
 }
 
@@ -68,24 +68,27 @@
 
 .public-hero__title-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
-  white-space: nowrap;
+  column-gap: 1rem;
+  row-gap: 0.35rem;
 }
 
 .public-hero__title-row span {
   display: inline-block;
   flex: 0 0 auto;
+  white-space: nowrap;
 }
 
-/* ≤1200px: levo/desno, tik nad koledarjem, gradient čez celo sliko */
-@media (max-width: 1199.98px) {
-  .public-hero__image {
-    filter: blur(1px);
-    transform: scale(1.03);
-  }
+.public-hero__title-row span:last-child {
+  margin-left: auto;
+}
 
+/* Media queries: px vrednosti (var() v @media večina brskalnikov ne podpira) */
+/* <xl: levo/desno, tik nad koledarjem, gradient čez celo sliko */
+@media (max-width: 1023.98px) {
   .public-hero__frame::after {
     background: linear-gradient(
       to top,
@@ -99,7 +102,7 @@
 
   .public-hero__content {
     align-items: stretch;
-    padding-bottom: clamp(5.75rem, 13vh, 8.5rem);
+    padding-bottom: clamp(6rem, 13.5vh, 8.75rem);
   }
 
   .public-hero__title {
@@ -109,7 +112,8 @@
   .public-hero__title-row {
     flex-direction: column;
     align-items: stretch;
-    justify-content: center;
+    justify-content: space-between;
+    min-height: 2em;
     gap: 0.35rem;
     white-space: normal;
   }
@@ -121,32 +125,59 @@
 
   .public-hero__title-row span:last-child {
     align-self: flex-end;
+    margin-left: 0;
     text-align: right;
   }
 }
 
-@media (max-width: 768px) {
+/* lg → xl: tablični font + napis nižje */
+@media (min-width: 768px) and (max-width: 1023.98px) {
   .public-hero__content {
-    padding-bottom: 7.25rem;
+    padding-bottom: clamp(3.5rem, 10.5vh, 9rem);
   }
 
   .public-hero__title {
-    font-size: clamp(2.25rem, 11cqi, 4rem);
+    font-size: clamp(5rem, 6vw + 1rem, 5rem);
+    line-height: 1.05;
+  }
+}
+
+/* <lg (telefon) */
+@media (max-width: 767.98px) {
+  .public-hero__content {
+    padding-bottom: 5.75rem;
+  }
+
+  h1.public-hero__title {
+    font-size: clamp(4rem, 7vw, 4rem);
     line-height: 1.15;
   }
 
   .public-hero__title-row {
     gap: 0.75rem;
+    min-height: 0;
   }
 }
 
-@media (min-width: 1024px) and (max-width: 1199.98px) {
+@media (max-width: 479.98px) {
   .public-hero__content {
-    padding-bottom: clamp(5rem, 11vh, 7rem);
+    padding-bottom: 6.3rem;
   }
 
+  h1.public-hero__title {
+    font-size: clamp(3rem, 6.5vw, 1.875rem);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1279.98px) {
   .public-hero__title {
-    font-size: 5.5rem;
+    font-size: 6rem;
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1535.98px) {
+  .public-hero__title {
+    font-size: 6rem;
   }
 }
 
