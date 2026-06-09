@@ -4,6 +4,14 @@
   z-index: 40;
   background: #fff;
   border-bottom: 1px solid rgb(30 58 47 / 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform;
+}
+
+.event-listing-filter--hidden {
+  transform: translateY(-100%);
+  pointer-events: none;
+  box-shadow: none;
 }
 
 .event-listing-filter__inner {
@@ -190,4 +198,91 @@
   .event-listing-results__grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
+
+/* Mobilni swiper za kartice (domača stran) */
+.event-cards-carousel {
+  position: relative;
+}
+
+.event-cards-carousel__root {
+  position: relative;
+}
+
+.event-cards-carousel__track {
+  margin-left: 0;
+}
+
+.event-cards-carousel__slide {
+  flex: 0 0 88%;
+  padding-left: 0;
+  padding-right: 0.75rem;
+}
+
+.event-cards-carousel__slide:last-child {
+  padding-right: 0;
+}
+
+.event-cards-carousel__slide > * {
+  height: 100%;
+}
+
+.event-cards-carousel__nav {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgb(30 58 47 / 0.1);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.95);
+  color: #18201b;
+  box-shadow: 0 2px 8px rgb(24 32 27 / 0.12);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.event-cards-carousel__nav svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.event-cards-carousel__nav:hover {
+  background: #fff;
+  color: #2f5d46;
+}
+
+.event-cards-carousel__nav--prev {
+  left: 0.25rem;
+}
+
+.event-cards-carousel__nav--next {
+  right: 0.25rem;
+}
+
+.event-cards-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.event-cards-carousel__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(24 32 27 / 0.2);
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.event-cards-carousel__dot.is-active {
+  background: #2f5d46;
+  transform: scale(1.15);
 }

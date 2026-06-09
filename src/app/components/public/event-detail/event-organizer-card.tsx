@@ -12,28 +12,25 @@ export function EventOrganizerCard({ event }: EventOrganizerCardProps) {
   }
 
   return (
-    <div className="event-detail-panel p-5 bg-white border border-[#1E3A2F]/8 shadow-sm">
-      <h2 className="text-sm font-medium text-[#18201B] mb-4">Organizator</h2>
-      <dl className="space-y-3">
+    <div className="event-detail-panel event-detail-organizer p-5">
+      <h2 className="event-detail-panel-heading text-base">Organizator</h2>
+      <dl className="event-detail-organizer__list">
         {organizerName && (
-          <div className="flex items-start gap-3">
-            <User className="w-4 h-4 text-[#2F5D46] mt-0.5 shrink-0" aria-hidden />
+          <div className="event-detail-organizer__row">
+            <User className="event-detail-organizer__icon" aria-hidden />
             <div>
-              <dt className="text-xs text-[#18201B]/50 uppercase tracking-wider">Ime</dt>
-              <dd className="text-[#18201B]">{organizerName}</dd>
+              <dt className="event-detail-organizer__label">Ime</dt>
+              <dd className="event-detail-organizer__value">{organizerName}</dd>
             </div>
           </div>
         )}
         {organizerEmail && (
-          <div className="flex items-start gap-3">
-            <Mail className="w-4 h-4 text-[#2F5D46] mt-0.5 shrink-0" aria-hidden />
+          <div className="event-detail-organizer__row">
+            <Mail className="event-detail-organizer__icon" aria-hidden />
             <div>
-              <dt className="text-xs text-[#18201B]/50 uppercase tracking-wider">E-pošta</dt>
+              <dt className="event-detail-organizer__label">E-pošta</dt>
               <dd>
-                <a
-                  href={`mailto:${organizerEmail}`}
-                  className="text-[#2F5D46] hover:underline break-all"
-                >
+                <a href={`mailto:${organizerEmail}`} className="event-detail-organizer__link break-all">
                   {organizerEmail}
                 </a>
               </dd>
@@ -41,12 +38,15 @@ export function EventOrganizerCard({ event }: EventOrganizerCardProps) {
           </div>
         )}
         {organizerPhone && (
-          <div className="flex items-start gap-3">
-            <Phone className="w-4 h-4 text-[#2F5D46] mt-0.5 shrink-0" aria-hidden />
+          <div className="event-detail-organizer__row">
+            <Phone className="event-detail-organizer__icon" aria-hidden />
             <div>
-              <dt className="text-xs text-[#18201B]/50 uppercase tracking-wider">Telefon</dt>
+              <dt className="event-detail-organizer__label">Telefon</dt>
               <dd>
-                <a href={`tel:${organizerPhone.replace(/\s/g, '')}`} className="text-[#2F5D46] hover:underline">
+                <a
+                  href={`tel:${organizerPhone.replace(/\s/g, '')}`}
+                  className="event-detail-organizer__link"
+                >
                   {organizerPhone}
                 </a>
               </dd>

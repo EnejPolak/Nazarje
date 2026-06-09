@@ -13,9 +13,9 @@ export function EventLocationCard({ event }: EventLocationCardProps) {
 
   return (
     <div className="event-detail-panel overflow-hidden">
-      <div className="px-5 pt-5 pb-3 flex items-center gap-2">
-        <MapPin className="w-4 h-4 event-detail-panel-icon" />
-        <h2 className="event-detail-panel-heading mb-0 text-base">Lokacija dogodka</h2>
+      <div className="event-detail-panel-head px-5 pt-5 pb-3">
+        <MapPin className="event-detail-panel-icon" aria-hidden />
+        <h2 className="event-detail-panel-heading text-base">Lokacija dogodka</h2>
       </div>
       <p className="event-detail-panel-muted px-5 pb-3 text-sm">{event.location}</p>
       <div className="h-56 w-full">

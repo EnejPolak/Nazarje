@@ -16,9 +16,9 @@ export function EventShareCard({
 }: EventShareCardProps) {
   return (
     <div className="event-detail-panel p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <Share2 className="w-4 h-4 event-detail-panel-icon" />
-        <h2 className="event-detail-panel-heading mb-0 text-base">Deli ta dogodek</h2>
+      <div className="event-detail-panel-head mb-4">
+        <Share2 className="event-detail-panel-icon" aria-hidden />
+        <h2 className="event-detail-panel-heading text-base">Deli ta dogodek</h2>
       </div>
       <p className="event-detail-panel-muted text-xs mb-4">
         Povabi prijatelje in znance na ta dogodek.

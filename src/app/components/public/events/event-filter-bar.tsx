@@ -2,6 +2,8 @@ import React from 'react';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { categoryColorHex } from '../../../data/events';
 import type { EventSortOption } from '../../../hooks/use-event-listing';
+import { useScrollHideOnDown } from '../../../hooks/use-scroll-hide-on-down';
+import { useIsMobile } from '../../ui/use-mobile';
 import '../../../styles/components/event-listing.css';
 
 export interface EventSortOptionItem {
@@ -46,9 +48,16 @@ export function EventFilterBar({
 }: EventFilterBarProps) {
   const searchId = 'event-listing-search';
   const sortId = 'event-listing-sort';
+  const isMobile = useIsMobile();
+  const filterHidden = useScrollHideOnDown(isMobile);
 
   return (
-    <div className="event-listing-filter" role="search" aria-label="Iskanje in filtri dogodkov">
+    <div
+      className={`event-listing-filter${filterHidden ? ' event-listing-filter--hidden' : ''}`}
+      role="search"
+      aria-label="Iskanje in filtri dogodkov"
+      aria-hidden={filterHidden}
+    >
       <div className="event-listing-filter__inner">
         <div className="event-listing-filter__search">
           <Search className="event-listing-filter__search-icon" aria-hidden />

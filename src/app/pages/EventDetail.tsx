@@ -134,14 +134,6 @@ export function EventDetail() {
                 onInstagramShare={shareInstagram}
                 onCopyLink={copyLink}
               />
-
-              <button
-                type="button"
-                onClick={() => navigate('/events')}
-                className="event-detail-back-button"
-              >
-                ← Vsi dogodki
-              </button>
             </aside>
           </div>
         </EventDetailHero>

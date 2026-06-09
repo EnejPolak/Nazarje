@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
-import { FileText, Save, Trash2, X } from 'lucide-react';
+import { FileText, ImagePlus, Save, Trash2, X } from 'lucide-react';
 import '../styles/components/crm-event-form.css';
 import type { EventData } from '../data/events';
 import {
@@ -247,6 +247,16 @@ export function CrmEventForm() {
     if (imageInputRef.current) {
       imageInputRef.current.value = '';
     }
+  };
+
+  const openImagePicker = () => {
+    imageInputRef.current?.click();
+  };
+
+  const removeImage = () => {
+    clearLocalImagePreview();
+    setImageUrl('');
+    setSaveError(null);
   };
 
   const onImageFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -620,24 +630,60 @@ export function CrmEventForm() {
             >
               <div className="crm-event-form__media-block">
                 <p className="crm-event-form__subhead">Slika</p>
-                <Field label="Fotografija" hint="opcijsko · JPEG, PNG, WebP, GIF">
+                <Field label="Fotografija dogodka" hint="opcijsko · JPEG, PNG, WebP, GIF">
                   <input
                     ref={imageInputRef}
                     type="file"
                     accept={EVENT_IMAGE_ACCEPT}
                     onChange={onImageFileChange}
                     disabled={saving || uploadingImage}
-                    className="crm-event-form__file"
+                    className="crm-event-form__file-input-hidden"
+                    tabIndex={-1}
+                    aria-hidden
                   />
-                  {selectedImageFile && (
-                    <p className="crm-event-form__file-name">{selectedImageFile.name}</p>
-                  )}
-                  {uploadingImage && <p className="crm-event-form__status">Nalagam sliko…</p>}
-                  {previewImageUrl && (
-                    <div className="crm-event-form__image-preview">
-                      <img src={previewImageUrl} alt="Predogled slike" />
+                  {!previewImageUrl ? (
+                    <button
+                      type="button"
+                      onClick={openImagePicker}
+                      disabled={saving || uploadingImage}
+                      className="crm-event-form__btn crm-event-form__btn--ghost crm-event-form__image-add"
+                    >
+                      <ImagePlus aria-hidden />
+                      Dodaj fotografijo
+                    </button>
+                  ) : (
+                    <div className="crm-event-form__image-current">
+                      <div className="crm-event-form__image-preview">
+                        <img src={previewImageUrl} alt="Predogled slike" />
+                      </div>
+                      <div className="crm-event-form__image-actions">
+                        <button
+                          type="button"
+                          onClick={openImagePicker}
+                          disabled={saving || uploadingImage}
+                          className="crm-event-form__btn crm-event-form__btn--ghost"
+                        >
+                          <ImagePlus aria-hidden />
+                          Zamenjaj sliko
+                        </button>
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          disabled={saving || uploadingImage}
+                          className="crm-event-form__btn crm-event-form__btn--danger"
+                        >
+                          <Trash2 aria-hidden />
+                          Odstrani sliko
+                        </button>
+                      </div>
+                      {selectedImageFile && (
+                        <p className="crm-event-form__file-name">
+                          {selectedImageFile.name} · naloži se ob shranjevanju
+                        </p>
+                      )}
                     </div>
                   )}
+                  {uploadingImage && <p className="crm-event-form__status">Nalagam sliko…</p>}
                 </Field>
               </div>
               <div className="crm-event-form__media-block">

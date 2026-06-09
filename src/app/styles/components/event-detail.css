@@ -4,11 +4,31 @@
   min-height: 100vh;
   flex-direction: column;
   background: #1e3a2f;
+  font-family: var(--font-family-button);
 }
 
 .event-detail-panel {
   border-radius: var(--event-detail-radius);
   overflow: hidden;
+}
+
+.event-detail-panel-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+.event-detail-panel-head .event-detail-panel-icon {
+  display: block;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+}
+
+.event-detail-panel-head .event-detail-panel-heading {
+  margin: 0;
+  line-height: 1.2;
 }
 
 .event-detail-panel-heading {
@@ -169,9 +189,10 @@
   z-index: 1;
   background: linear-gradient(
     180deg,
-    rgb(24 32 27 / 0.55) 0%,
-    rgb(30 58 47 / 0.7) 40%,
-    rgb(30 58 47 / 0.88) 100%
+    rgb(15 28 20 / 0.62) 0%,
+    rgb(20 40 30 / 0.78) 35%,
+    rgb(18 34 25 / 0.93) 70%,
+    rgb(15 28 20 / 0.97) 100%
   );
 }
 
@@ -186,18 +207,18 @@
   padding: 0.5rem 1rem;
   border: 1px solid rgb(255 255 255 / 0.35);
   border-radius: 999px;
-  background: rgb(247 244 238 / 0.9);
-  color: #1e3a2f;
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
   font-size: 0.875rem;
   font-weight: 600;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  transition: background 200ms ease, color 200ms ease;
+  transition: background 200ms ease, border-color 200ms ease;
 }
 
 .event-detail-hero__back:hover {
-  background: #fff;
-  color: #2f5d46;
+  background: rgb(255 255 255 / 0.2);
+  border-color: rgb(255 255 255 / 0.5);
 }
 
 .event-detail-hero__body {
@@ -232,10 +253,11 @@
 .event-detail-hero__title {
   margin: 0 0 1.25rem;
   color: #fff;
+  font-family: var(--font-family-button);
   font-size: clamp(1.875rem, 5vw, 3rem);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.08;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   text-shadow: 0 4px 24px rgb(0 0 0 / 0.35);
 }
 
@@ -250,27 +272,28 @@
   align-items: flex-start;
   gap: 0.75rem;
   padding: 0.85rem 1rem;
-  border: 1px solid rgb(255 255 255 / 0.2);
+  border: 1px solid rgb(255 255 255 / 0.18);
   border-radius: var(--event-detail-radius);
-  background: rgb(255 255 255 / 0.12);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgb(255 255 255 / 0.1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
 }
 
 .event-detail-hero__meta-icon {
-  width: 1.125rem;
-  height: 1.125rem;
-  margin-top: 0.15rem;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.25rem;
   flex-shrink: 0;
-  color: #eaf1ea;
+  color: rgb(168 216 184 / 0.9);
 }
 
 .event-detail-hero__meta-label {
-  margin: 0 0 0.2rem;
-  color: rgb(255 255 255 / 0.55);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  margin: 0 0 0.25rem;
+  color: rgb(255 255 255 / 0.45);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -278,27 +301,50 @@
   margin: 0;
   color: #fff;
   font-size: 0.9375rem;
-  font-weight: 600;
-  line-height: 1.35;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .event-detail-hero__meta-item dd {
   margin: 0;
 }
 
+/* Glavni panel (O dogodku, Priponke) — bolj opazen */
 .event-detail-hero .event-detail-panel {
-  background: rgb(255 255 255 / 0.14);
-  border: 1px solid rgb(255 255 255 / 0.22);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid rgb(255 255 255 / 0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 4px 24px rgb(0 0 0 / 0.18);
+}
+
+/* Razlika: sidebar kartice (Organizator, Lokacija, Deli) */
+.event-detail-sidebar .event-detail-panel {
+  background: rgb(255 255 255 / 0.06);
+  border-color: rgb(255 255 255 / 0.1);
 }
 
 .event-detail-hero .event-detail-panel-heading {
   color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  opacity: 1;
+}
+
+/* Ločilna črta pod naslovom sekcije */
+.event-detail-hero .event-detail-panel-heading:not(.event-detail-panel-head .event-detail-panel-heading) {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  margin-bottom: 1.25rem;
 }
 
 .event-detail-hero .event-detail-panel-prose {
-  color: rgb(255 255 255 / 0.88);
-  line-height: 1.65;
+  color: rgb(230 242 235 / 0.9);
+  font-size: 0.9375rem;
+  line-height: 1.7;
 }
 
 .event-detail-hero .event-detail-panel-prose p {
@@ -306,11 +352,12 @@
 }
 
 .event-detail-hero .event-detail-panel-muted {
-  color: rgb(255 255 255 / 0.65);
+  color: rgb(255 255 255 / 0.5);
 }
 
 .event-detail-hero .event-detail-panel-link {
-  color: #c8e6d0;
+  color: #a8d8b8;
+  font-weight: 600;
   transition: color 200ms ease;
 }
 
@@ -319,7 +366,86 @@
 }
 
 .event-detail-hero .event-detail-panel-icon {
-  color: #eaf1ea;
+  color: rgb(200 230 208 / 0.8);
+}
+
+.event-detail-organizer__list {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.event-detail-organizer__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.event-detail-organizer__icon {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+  color: rgb(255 255 255 / 0.75);
+}
+
+.event-detail-organizer__label {
+  margin: 0 0 0.25rem;
+  color: rgb(255 255 255 / 0.42);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.event-detail-organizer__value {
+  margin: 0;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.event-detail-organizer__link {
+  color: #a8d8b8;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.event-detail-organizer__link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.event-detail-hero .event-detail-action--copy {
+  border-color: rgb(255 255 255 / 0.25);
+  background: rgb(255 255 255 / 0.1);
+  color: #fff;
+}
+
+.event-detail-hero .event-detail-action--copy:hover {
+  border-color: rgb(255 255 255 / 0.4);
+  background: rgb(255 255 255 / 0.16);
+  color: #fff;
+}
+
+.event-detail-hero .event-detail-action--copy.is-copied {
+  border-color: rgb(255 255 255 / 0.45);
+  background: rgb(255 255 255 / 0.18);
+  color: #fff;
+}
+
+.event-detail-hero .event-detail-attachment {
+  color: #fff;
+}
+
+.event-detail-hero .event-detail-attachment__icon--file {
+  border-color: rgb(255 255 255 / 0.2);
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
 }
 
 .event-detail-content {
