@@ -144,7 +144,13 @@
 .event-listing-results__grid {
   display: grid;
   grid-template-columns: 1fr;
+  align-items: stretch;
   gap: 1.5rem;
+}
+
+.event-listing-results__grid > * {
+  min-width: 0;
+  height: 100%;
 }
 
 .event-listing-empty {

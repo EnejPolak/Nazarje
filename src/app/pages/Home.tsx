@@ -15,6 +15,7 @@ import { SkipLink } from '../components/public/layout/skip-link';
 import { eventDetailPath } from '../utils/event-path';
 // import { useNewsletterForm } from '../hooks/use-newsletter-form';
 import '../styles/components/home.css';
+import '../styles/components/event-listing.css';
 
 const fadeUpInView = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -100,7 +101,7 @@ export function Home() {
           ) : error ? (
             <EventsError message={error} onRetry={refetch} />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="event-listing-results__grid">
               {upcomingEvents.slice(0, 6).map((event, i) => (
                 <EventCard
                   key={event.id}
