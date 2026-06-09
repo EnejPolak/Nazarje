@@ -1,4 +1,7 @@
+import { API_BASE_URL, apiUrl, getApiBaseUrl } from '@/lib/api';
 import type { ApiResponse } from './types';
+
+export { API_BASE_URL, apiUrl, getApiBaseUrl };
 
 export class ApiError extends Error {
   constructor(
@@ -9,17 +12,6 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
   }
-}
-
-export function getApiBaseUrl(): string {
-  const url = import.meta.env.VITE_API_URL;
-  if (!url) {
-    throw new ApiError(
-      'VITE_API_URL ni nastavljen. Dodaj ga v .env (glej .env.example).',
-      0
-    );
-  }
-  return url.replace(/\/$/, '');
 }
 
 export function useMockData(): boolean {
@@ -64,8 +56,7 @@ export async function apiFetch<T>(
   options: ApiFetchOptions = {}
 ): Promise<T> {
   const { json, adminAuth, headers: customHeaders, ...init } = options;
-  const base = getApiBaseUrl();
-  const url = path.startsWith('http') ? path : `${base}${path.startsWith('/') ? path : `/${path}`}`;
+  const url = apiUrl(path);
 
   const headers = new Headers(customHeaders);
   if (json !== undefined) {
@@ -100,7 +91,7 @@ export async function apiFetch<T>(
     let msg = payload?.error ?? payload?.message ?? `HTTP ${res.status}`;
     if (res.status === 405) {
       msg =
-        'Strežnik ne dovoljuje te metode (405). Preveri na api.nazarje.si, ali endpoint podpira zahtevano metodo (npr. POST za ustvarjanje dogodka na /admin/event.php).';
+        'Strežnik ne dovoljuje te metode (405). Preveri, ali endpoint podpira zahtevano metodo (npr. POST za ustvarjanje dogodka na /admin/event.php).';
     } else if (res.status === 404) {
       msg = payload?.error ?? payload?.message ?? 'Endpoint ni najden (404).';
     } else if (res.status === 401) {
