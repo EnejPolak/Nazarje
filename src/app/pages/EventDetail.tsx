@@ -11,9 +11,19 @@ import { Footer } from '../components/public/layout/footer';
 import { SkipLink } from '../components/public/layout/skip-link';
 import { useEventDetail } from '../hooks/use-event-detail';
 import { usePageMeta } from '../hooks/use-page-meta';
+import { useStructuredData } from '../hooks/use-structured-data';
+import { buildBreadcrumbJsonLd, buildEventJsonLd } from '../utils/structured-data';
 import { formatSlovenianDate } from '../utils/event-date';
 import { absoluteUrl, getOgDefaultImage } from '../utils/site-config';
 import { eventDetailPath } from '../utils/event-path';
+
+const META_DESCRIPTION_MAX = 160;
+
+function clampDescription(text: string): string {
+  const normalized = text.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= META_DESCRIPTION_MAX) return normalized;
+  return `${normalized.slice(0, META_DESCRIPTION_MAX - 1).trimEnd()}…`;
+}
 import { EventOrganizerCard } from '../components/public/event-detail/event-organizer-card';
 import '../styles/components/event-detail.css';
 
@@ -27,7 +37,7 @@ export function EventDetail() {
     event
       ? {
           title: `${event.title} · Nazarje Dogodki`,
-          description: event.description,
+          description: clampDescription(event.description),
           canonicalUrl: absoluteUrl(eventDetailPath(event)),
           ogImage: event.imageUrl || getOgDefaultImage(),
           ogType: 'article',
@@ -37,6 +47,19 @@ export function EventDetail() {
           description: 'Podrobnosti dogodka v Nazarjah.',
           noindex: true,
         }
+  );
+
+  useStructuredData(
+    event
+      ? [
+          buildEventJsonLd(event),
+          buildBreadcrumbJsonLd([
+            { name: 'Domov', path: '/' },
+            { name: 'Vsi dogodki', path: '/events' },
+            { name: event.title, path: eventDetailPath(event) },
+          ]),
+        ]
+      : null
   );
 
   if (loading) {

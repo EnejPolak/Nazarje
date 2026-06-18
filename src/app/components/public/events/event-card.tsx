@@ -83,8 +83,7 @@ export function EventCard({
           <div className="event-card__image-motion">
             <ImageWithFallback
               src={event.imageUrl}
-              alt=""
-              aria-hidden
+              alt={event.title}
               className={`event-card__image ${grayscale ? 'grayscale group-hover:grayscale-0' : ''}`}
             />
           </div>

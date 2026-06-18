@@ -1,12 +1,14 @@
 import { Link } from 'react-router';
 import { LegalPageLayout } from '../components/public/legal/legal-page-layout';
 import { usePageMeta } from '../hooks/use-page-meta';
+import { useStructuredData } from '../hooks/use-structured-data';
 
 export function PrivacyPolicy() {
   usePageMeta({
     title: 'Politika zasebnosti · Nazarje Dogodki',
     description: 'Politika zasebnosti portala dogodkov Občine Nazarje.',
   });
+  useStructuredData(null);
 
   return (
     <LegalPageLayout title="Politika zasebnosti">

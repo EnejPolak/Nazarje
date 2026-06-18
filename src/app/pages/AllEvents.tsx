@@ -12,6 +12,8 @@ import { Header } from '../components/public/layout/header';
 import { SkipLink } from '../components/public/layout/skip-link';
 import { useEventListing } from '../hooks/use-event-listing';
 import { usePageMeta, PAGE_META_DEFAULTS } from '../hooks/use-page-meta';
+import { useStructuredData } from '../hooks/use-structured-data';
+import { buildBreadcrumbJsonLd } from '../utils/structured-data';
 import { eventDetailPath } from '../utils/event-path';
 
 const sortOptions: EventSortOptionItem[] = [
@@ -22,6 +24,12 @@ const sortOptions: EventSortOptionItem[] = [
 
 export function AllEvents() {
   usePageMeta(PAGE_META_DEFAULTS.allEvents);
+  useStructuredData(
+    buildBreadcrumbJsonLd([
+      { name: 'Domov', path: '/' },
+      { name: 'Vsi dogodki', path: '/events' },
+    ])
+  );
   const navigate = useNavigate();
   const { events: mergedEvents, loading, error, refetch } = usePublishedEvents();
   const {

@@ -73,17 +73,23 @@ export function usePageMeta({
   }, [title, description, canonicalUrl, ogImage, ogType, noindex]);
 }
 
+const SITE_URL = getSiteUrl();
+
 export const PAGE_META_DEFAULTS = {
   home: {
-    title: 'Dogodki Nazarje',
-    description: DEFAULT_DESCRIPTION,
+    title: 'Dogodki Nazarje | Koledar prireditev Občine Nazarje',
+    description:
+      'Aktualni dogodki in prireditve v občini Nazarje na enem mestu — kulturni, športni in družabni dogodki v interaktivnem koledarju.',
+    canonicalUrl: `${SITE_URL}/`,
   },
   allEvents: {
     title: 'Vsi dogodki · Nazarje',
     description: 'Pregled vseh prihajajočih dogodkov v Nazarjah z možnostjo filtriranja.',
+    canonicalUrl: `${SITE_URL}/events`,
   },
   pastEvents: {
     title: 'Pretekli dogodki · Nazarje',
     description: 'Arhiv preteklih dogodkov v občini Nazarje.',
+    canonicalUrl: `${SITE_URL}/past-events`,
   },
 } as const;

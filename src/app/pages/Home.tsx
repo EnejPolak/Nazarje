@@ -13,6 +13,7 @@ import { FallingLeaves } from '../components/Falling-leaves';
 import { TreesBackground } from '../components/Three-background';
 import { usePublishedEvents } from '../hooks/use-published-events';
 import { usePageMeta, PAGE_META_DEFAULTS } from '../hooks/use-page-meta';
+import { useStructuredData } from '../hooks/use-structured-data';
 import { SkipLink } from '../components/public/layout/skip-link';
 import { eventDetailPath } from '../utils/event-path';
 // import { useNewsletterForm } from '../hooks/use-newsletter-form';
@@ -28,6 +29,7 @@ const fadeUpInView = (delay = 0) => ({
 
 export function Home() {
   usePageMeta(PAGE_META_DEFAULTS.home);
+  useStructuredData(null);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { events, loading, error, refetch } = usePublishedEvents();
@@ -92,6 +94,28 @@ export function Home() {
         <TreesBackground />
 
         <div className="home-below-hero__content">
+        <section className="pt-16 pb-4 bg-transparent" aria-labelledby="intro-heading">
+          <div className="max-w-3xl mx-auto px-6 text-center">
+            <motion.div {...fadeUpInView(0)}>
+              <h2 id="intro-heading" className="text-3xl text-[#18201B] mb-5">
+                Dogodki in prireditve v občini Nazarje
+              </h2>
+              <p className="text-[#18201B]/75 leading-relaxed mb-4">
+                Dobrodošli na uradnem koledarju dogodkov Občine Nazarje. Na enem mestu zbiramo
+                kulturne, športne in družabne prireditve v Nazarjah ter okoliških krajih — od
+                koncertov, sejmov in razstav do delavnic in tradicionalnih dogodkov. Tako vedno
+                veste, kaj se dogaja v vašem kraju.
+              </p>
+              <p className="text-[#18201B]/75 leading-relaxed">
+                Pregledujte prihajajoče dogodke v interaktivnem koledarju, poiščite podrobnosti o
+                lokaciji in terminu posameznega dogodka ali se sprehodite skozi arhiv preteklih
+                prireditev. Koledar dogodkov v Nazarjah redno posodabljamo, da ne zamudite nič
+                pomembnega.
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
         <section id="dogodki" className="py-16 bg-transparent" aria-labelledby="upcoming-events-heading">
           <div className="max-w-7xl mx-auto px-6">
           <motion.div {...fadeUpInView(0)} className="text-center mb-12">
