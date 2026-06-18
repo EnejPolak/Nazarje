@@ -76,7 +76,10 @@ export function EventCard({
       onKeyDown={handleKeyDown}
     >
       {event.imageUrl && (
-        <div className="event-card__image-wrap">
+        <div
+          className="event-card__image-wrap"
+          style={{ ['--card-image' as string]: `url("${event.imageUrl}")` }}
+        >
           <div className="event-card__image-motion">
             <ImageWithFallback
               src={event.imageUrl}

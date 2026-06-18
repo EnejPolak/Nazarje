@@ -14,12 +14,19 @@ export function EventDetailHero({ event, onBack, children }: EventDetailHeroProp
   return (
     <section className="event-detail-hero">
       {event.imageUrl ? (
-        <img src={event.imageUrl} alt={event.title} className="event-detail-hero__bg" />
+        <div
+          className="event-detail-hero__banner"
+          style={{ ['--detail-image' as string]: `url("${event.imageUrl}")` }}
+        >
+          <img
+            src={event.imageUrl}
+            alt={event.title}
+            className="event-detail-hero__banner-img"
+          />
+        </div>
       ) : (
-        <div className="event-detail-hero__bg event-detail-hero__bg--placeholder" aria-hidden />
+        <div className="event-detail-hero__banner event-detail-hero__banner--placeholder" aria-hidden />
       )}
-
-      <div className="event-detail-hero__shade" aria-hidden />
 
       <button type="button" onClick={onBack} className="event-detail-hero__back">
         <ArrowLeft className="w-4 h-4" aria-hidden />

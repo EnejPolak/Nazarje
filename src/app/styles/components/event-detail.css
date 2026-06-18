@@ -3,7 +3,7 @@
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  background: #1e3a2f;
+  background: #f7f4ee;
   font-family: var(--font-family-button);
 }
 
@@ -123,17 +123,17 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border: 1px solid rgb(255 255 255 / 0.15);
+  border: 1px solid rgb(30 58 47 / 0.1);
   border-radius: var(--event-detail-radius);
-  background: rgb(255 255 255 / 0.1);
+  background: #faf7f0;
   transition:
     background 200ms ease,
     border-color 200ms ease;
 }
 
 .event-detail-attachment:hover {
-  border-color: rgb(255 255 255 / 0.25);
-  background: rgb(255 255 255 / 0.16);
+  border-color: rgb(47 93 70 / 0.25);
+  background: #fdfbf6;
 }
 
 .event-detail-attachment__icon {
@@ -163,37 +163,40 @@
   min-height: calc(100vh - 4rem);
 }
 
-.event-detail-hero__bg {
-  position: fixed;
-  top: 4rem;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 0;
+/* Pas s sliko na vrhu — cela slika (contain), brez zooma, robove zapolni blur iste slike */
+.event-detail-hero__banner {
+  position: relative;
   width: 100%;
-  height: calc(100vh - 4rem);
-  object-fit: cover;
+  height: clamp(18rem, 50vh, 32rem);
+  overflow: hidden;
+  background: #14241b;
+}
+
+.event-detail-hero__banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--detail-image);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: blur(24px) saturate(1.15);
+  transform: scale(1.2);
+  pointer-events: none;
+}
+
+.event-detail-hero__banner-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   object-position: center;
 }
 
-.event-detail-hero__bg--placeholder {
+.event-detail-hero__banner--placeholder {
   background: linear-gradient(135deg, #1e3a2f 0%, #2f5d46 50%, #3d6f7a 100%);
-}
-
-.event-detail-hero__shade {
-  position: fixed;
-  top: 4rem;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  z-index: 1;
-  background: linear-gradient(
-    180deg,
-    rgb(15 28 20 / 0.62) 0%,
-    rgb(20 40 30 / 0.78) 35%,
-    rgb(18 34 25 / 0.93) 70%,
-    rgb(15 28 20 / 0.97) 100%
-  );
 }
 
 .event-detail-hero__back {
@@ -205,20 +208,21 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  border: 1px solid rgb(255 255 255 / 0.35);
+  border: 1px solid rgb(30 58 47 / 0.12);
   border-radius: 999px;
-  background: rgb(255 255 255 / 0.12);
-  color: #fff;
+  background: rgb(252 250 244 / 0.92);
+  color: #18201b;
   font-size: 0.875rem;
   font-weight: 600;
+  box-shadow: 0 4px 14px rgb(18 48 55 / 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: background 200ms ease, border-color 200ms ease;
 }
 
 .event-detail-hero__back:hover {
-  background: rgb(255 255 255 / 0.2);
-  border-color: rgb(255 255 255 / 0.5);
+  background: #fdfbf6;
+  border-color: rgb(47 93 70 / 0.3);
 }
 
 .event-detail-hero__body {
@@ -252,13 +256,12 @@
 
 .event-detail-hero__title {
   margin: 0 0 1.25rem;
-  color: #fff;
+  color: #18201b;
   font-family: var(--font-family-button);
   font-size: clamp(1.875rem, 5vw, 3rem);
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: -0.02em;
-  text-shadow: 0 4px 24px rgb(0 0 0 / 0.35);
 }
 
 .event-detail-hero__meta {
@@ -272,12 +275,12 @@
   align-items: flex-start;
   gap: 0.75rem;
   padding: 0.85rem 1rem;
-  border: 1px solid rgb(255 255 255 / 0.18);
+  border: 1px solid rgb(30 58 47 / 0.1);
   border-radius: var(--event-detail-radius);
-  background: rgb(255 255 255 / 0.1);
+  background: #fcfaf4;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.1);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.6);
 }
 
 .event-detail-hero__meta-icon {
@@ -285,12 +288,12 @@
   height: 1rem;
   margin-top: 0.25rem;
   flex-shrink: 0;
-  color: rgb(168 216 184 / 0.9);
+  color: #3d6f7a;
 }
 
 .event-detail-hero__meta-label {
   margin: 0 0 0.25rem;
-  color: rgb(255 255 255 / 0.45);
+  color: rgb(24 32 27 / 0.55);
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -299,7 +302,7 @@
 
 .event-detail-hero__meta-value {
   margin: 0;
-  color: #fff;
+  color: #18201b;
   font-size: 0.9375rem;
   font-weight: 700;
   line-height: 1.3;
@@ -311,23 +314,23 @@
 
 /* Glavni panel (O dogodku, Priponke) — bolj opazen */
 .event-detail-hero .event-detail-panel {
-  background: rgb(255 255 255 / 0.08);
-  border: 1px solid rgb(255 255 255 / 0.14);
+  background: #fcfaf4;
+  border: 1px solid rgb(30 58 47 / 0.1);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.1),
-    0 4px 24px rgb(0 0 0 / 0.18);
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    0 4px 24px rgb(18 48 55 / 0.06);
 }
 
 /* Razlika: sidebar kartice (Organizator, Lokacija, Deli) */
 .event-detail-sidebar .event-detail-panel {
-  background: rgb(255 255 255 / 0.06);
-  border-color: rgb(255 255 255 / 0.1);
+  background: #f8f4ec;
+  border-color: rgb(30 58 47 / 0.08);
 }
 
 .event-detail-hero .event-detail-panel-heading {
-  color: #fff;
+  color: #18201b;
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -337,12 +340,12 @@
 /* Ločilna črta pod naslovom sekcije */
 .event-detail-hero .event-detail-panel-heading:not(.event-detail-panel-head .event-detail-panel-heading) {
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgb(255 255 255 / 0.1);
+  border-bottom: 1px solid rgb(30 58 47 / 0.08);
   margin-bottom: 1.25rem;
 }
 
 .event-detail-hero .event-detail-panel-prose {
-  color: rgb(230 242 235 / 0.9);
+  color: #424b46;
   font-size: 0.9375rem;
   line-height: 1.7;
 }
@@ -352,21 +355,21 @@
 }
 
 .event-detail-hero .event-detail-panel-muted {
-  color: rgb(255 255 255 / 0.5);
+  color: rgb(24 32 27 / 0.55);
 }
 
 .event-detail-hero .event-detail-panel-link {
-  color: #a8d8b8;
+  color: #2f5d46;
   font-weight: 600;
   transition: color 200ms ease;
 }
 
 .event-detail-hero .event-detail-panel-link:hover {
-  color: #fff;
+  color: #1e3a2f;
 }
 
 .event-detail-hero .event-detail-panel-icon {
-  color: rgb(200 230 208 / 0.8);
+  color: #2f5d46;
 }
 
 .event-detail-organizer__list {
@@ -386,12 +389,12 @@
   height: 1rem;
   margin-top: 0.2rem;
   flex-shrink: 0;
-  color: rgb(255 255 255 / 0.75);
+  color: #2f5d46;
 }
 
 .event-detail-organizer__label {
   margin: 0 0 0.25rem;
-  color: rgb(255 255 255 / 0.42);
+  color: rgb(24 32 27 / 0.5);
   font-size: 0.625rem;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -400,14 +403,14 @@
 
 .event-detail-organizer__value {
   margin: 0;
-  color: #fff;
+  color: #18201b;
   font-size: 0.9rem;
   font-weight: 700;
   line-height: 1.35;
 }
 
 .event-detail-organizer__link {
-  color: #a8d8b8;
+  color: #2f5d46;
   font-size: 0.9rem;
   font-weight: 600;
   line-height: 1.35;
@@ -416,36 +419,36 @@
 }
 
 .event-detail-organizer__link:hover {
-  color: #fff;
+  color: #1e3a2f;
   text-decoration: underline;
 }
 
 .event-detail-hero .event-detail-action--copy {
-  border-color: rgb(255 255 255 / 0.25);
-  background: rgb(255 255 255 / 0.1);
-  color: #fff;
+  border-color: rgb(30 58 47 / 0.15);
+  background: #f7f4ee;
+  color: #18201b;
 }
 
 .event-detail-hero .event-detail-action--copy:hover {
-  border-color: rgb(255 255 255 / 0.4);
-  background: rgb(255 255 255 / 0.16);
-  color: #fff;
+  border-color: rgb(47 93 70 / 0.3);
+  background: #eaf1ea;
+  color: #18201b;
 }
 
 .event-detail-hero .event-detail-action--copy.is-copied {
-  border-color: rgb(255 255 255 / 0.45);
-  background: rgb(255 255 255 / 0.18);
-  color: #fff;
+  border-color: #2f5d46;
+  background: #eaf1ea;
+  color: #2f5d46;
 }
 
 .event-detail-hero .event-detail-attachment {
-  color: #fff;
+  color: #18201b;
 }
 
 .event-detail-hero .event-detail-attachment__icon--file {
-  border-color: rgb(255 255 255 / 0.2);
-  background: rgb(255 255 255 / 0.12);
-  color: #fff;
+  border-color: rgb(30 58 47 / 0.1);
+  background: #fcfaf4;
+  color: #2f5d46;
 }
 
 .event-detail-content {

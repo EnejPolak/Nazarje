@@ -29,16 +29,32 @@
 
 .event-card__image-wrap {
   position: relative;
-  height: clamp(9.5rem, 14vw, 12rem);
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   border-radius: var(--event-card-radius) var(--event-card-radius) 0 0;
   background: #111;
+}
+
+/* Blur fill: razmazana kopija iste slike zapolni prazne robove namesto črnine */
+.event-card__image-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--card-image);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: blur(20px) saturate(1.15);
+  transform: scale(1.2);
+  pointer-events: none;
 }
 
 .event-card__image-wrap::after {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 2;
   background: linear-gradient(
     180deg,
     rgb(0 0 0 / 0.04) 0%,
@@ -54,9 +70,15 @@
   height: 100%;
 }
 
+.event-card__image-motion {
+  position: relative;
+  z-index: 1;
+}
+
 .event-card__image {
   display: block;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   transition:
     filter 500ms ease,
     transform 450ms ease;
@@ -202,7 +224,7 @@
 
 @media (max-width: 640px) {
   .event-card__image-wrap {
-    height: 12rem;
+    aspect-ratio: 1 / 1;
   }
 
   .event-card__body {
