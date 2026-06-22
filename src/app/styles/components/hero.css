@@ -48,7 +48,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding-bottom: clamp(3.75rem, 10vh, 6.5rem);
+  padding-bottom: clamp(4.5rem, 11vh, 7.5rem);
   pointer-events: none;
 }
 
@@ -102,7 +102,7 @@
 
   .public-hero__content {
     align-items: stretch;
-    padding-bottom: clamp(6rem, 13.5vh, 8.75rem);
+    padding-bottom: clamp(6.75rem, 14.5vh, 9.75rem);
   }
 
   .public-hero__title {
@@ -133,7 +133,7 @@
 /* lg → xl: tablični font + napis nižje */
 @media (min-width: 768px) and (max-width: 1023.98px) {
   .public-hero__content {
-    padding-bottom: clamp(3.5rem, 10.5vh, 9rem);
+    padding-bottom: clamp(4.25rem, 11.5vh, 10rem);
   }
 
   .public-hero__title {
@@ -145,7 +145,7 @@
 /* <lg (telefon) */
 @media (max-width: 767.98px) {
   .public-hero__content {
-    padding-bottom: 5.75rem;
+    padding-bottom: 6.75rem;
   }
 
   h1.public-hero__title {
@@ -161,7 +161,7 @@
 
 @media (max-width: 479.98px) {
   .public-hero__content {
-    padding-bottom: 6.3rem;
+    padding-bottom: 7rem;
   }
 
   h1.public-hero__title {
